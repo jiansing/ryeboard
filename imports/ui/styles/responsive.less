@@ -1,0 +1,45 @@
+@import '/imports/ui/styles/variables/break-points';
+
+#render-target{
+
+  .responsive-display{
+    display: none!important;
+  }
+
+  .responsive-center {
+    text-align: center!important;
+    margin-bottom: 1rem;
+  }
+
+  .responsive-staggered-left{
+    position: relative;
+  }
+
+  .responsive-staggered-right{
+    position: relative;
+  }
+}
+
+@media (min-width: @screen-medium) {
+  #render-target {
+    .responsive-display{
+      display: inherit!important;;
+    }
+
+    .responsive-center {
+      text-align: left!important;;
+    }
+  }
+}
+
+@media (min-width: @screen-large) {
+  #render-target {
+    .responsive-display{
+      display: inherit!important;;
+    }
+
+    .responsive-center {
+      text-align: left!important;;
+    }
+  }
+}

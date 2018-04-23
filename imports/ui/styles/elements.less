@@ -1,0 +1,49 @@
+@import '/imports/ui/styles/variables/colors';
+@import '/imports/ui/styles/variables/break-points';
+@import '/imports/ui/styles/variables/styles';
+
+#render-target {
+
+  .animatedImage {
+    display: inline-block;
+    animation: animate-image 2s cubic-bezier(.68, .01, .01, .99) 0s infinite;
+  }
+
+  @keyframes animate-image {
+    0% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(10px);
+    }
+
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  .transition{
+    transition: all .25s ease-in-out;
+    background: transparent;
+  }
+
+  .flex-filler {
+    flex: 5;
+  }
+
+  hr {
+    margin-left: 25px;
+    margin-right: 25px;
+    color: lightgray;
+    //border: solid gray 5px;
+  }
+
+  .marginTop-huge {
+    margin-top: 20vh;
+  }
+
+  .flexWrap {
+    flex-wrap: wrap;
+  }
+}

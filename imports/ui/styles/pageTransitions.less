@@ -1,0 +1,95 @@
+.left-appear,
+.left-enter {
+  opacity: 0;
+}
+
+.left-appear-active,
+.left-enter-active {
+  transition: all .25s ease-in-out;
+  opacity: 1;
+}
+
+.left-exit {
+  transition: all .25s ease-in-out;
+  opacity: 1;
+}
+
+.left-exit-active {
+  opacity: 0;
+}
+
+.leftFade-appear,
+.leftFade-enter {
+  opacity: 0;
+  transform: translateX(-1.5rem);
+}
+
+.leftFade-appear-active,
+.leftFade-enter-active {
+  transition: all .75s ease-out;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.leftFade-exit {
+  transition: all .75s ease-out;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.leftFade-exit-active {
+  opacity: 0;
+  transform: translateX(-1.5rem);
+}
+
+
+
+.rightFade-appear,
+.rightFade-enter {
+  opacity: 0;
+  transform: translateX(1.5rem);
+}
+
+.rightFade-appear-active,
+.rightFade-enter-active {
+  transition: all .75s ease-out;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.rightFade-exit {
+  transition: all .75s ease-out;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.rightFade-exit-active {
+  opacity: 0;
+  transform: translateX(1.5rem);
+}
+
+
+
+.bottomFade-appear,
+.bottomFade-enter {
+  opacity: 0;
+  transform: translateY(1.5rem);
+}
+
+.bottomFade-appear-active,
+.bottomFade-enter-active {
+  transition: all .75s ease-out;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.bottomFade-exit {
+  transition: all .75s ease-out;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.bottomFade-exit-active {
+  opacity: 0;
+  transform: translateY(1.5rem);
+}

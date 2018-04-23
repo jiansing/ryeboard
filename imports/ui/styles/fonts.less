@@ -1,0 +1,70 @@
+@import '/imports/ui/styles/variables/break-points';
+@import url('https://fonts.googleapis.com/css?family=Nanum+Gothic:400,700,800&subset=korean');
+
+html {
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 14px !important;
+}
+
+#render-target {
+  h1 {
+    font-size: 3.0rem;
+    font-weight: 400;
+  }
+
+  h2 {
+    font-size: 2.5rem;
+    font-weight: 300;
+  }
+
+  h3 {
+    font-size: 2.0rem;
+    font-weight: 300;
+  }
+
+  h4 {
+    font-size: 1.75rem;
+    font-weight: 100;
+    margin: 0;
+  }
+
+  figcaption{
+    font-size: 1.75rem;
+    color: #828282;
+    font-weight: 300;
+  }
+
+  p {
+    font-size: 1.0rem;
+    line-height: 1.75;
+    font-weight: 300;
+  }
+
+  label{
+    font-size: 1.25rem;
+    line-height: 1.75;
+    font-weight: 200;
+  }
+
+  b {
+    font-weight: 700;
+    color: #E58A30;
+    display: inline;
+  }
+
+  .serif{
+    font-family: serif;
+  }
+}
+
+@media (min-width: @screen-medium) {
+  html {
+    font-size: 15px !important;
+  }
+}
+
+@media (min-width: @screen-large) {
+  html {
+    font-size: 16px !important;
+  }
+}

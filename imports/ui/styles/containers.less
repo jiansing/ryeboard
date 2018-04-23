@@ -1,0 +1,97 @@
+@import '/imports/ui/styles/variables/colors';
+@import '/imports/ui/styles/variables/break-points';
+@import '/imports/ui/styles/variables/styles';
+
+#render-target{
+
+  #layout-app{
+    position: relative;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  #layout-marketing{
+    position: relative;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .container-default {
+    width: 100%;
+    max-width: 1100px;
+    padding: @padding-large @padding-large;
+    margin: auto;
+  }
+
+  .container-restrain {
+    width: 100%;
+    max-width: 750px;
+    padding: @padding @padding;
+    margin: auto;
+  }
+
+  .container-restrict {
+    width: 100%;
+    max-width: 1000px;
+    margin: auto;
+  }
+
+  .container-tight{
+    width: 100%;
+    max-width: 750px;
+    margin: auto;
+  }
+
+  .container-full{
+    width: 100vw;
+    min-height: 100vh;
+  }
+
+  .container-fullWidth {
+    width: 100vw;
+  }
+
+  .container-fullHeight{
+    min-height: 100vh;
+  }
+
+  .container-center-h {
+    display: flex;
+    justify-content: center;
+  }
+
+  .container-center-v {
+    display: flex;
+    align-items: center;
+  }
+
+  .container-center-hv {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  @media (min-width: @screen-medium) {
+    .container-fullWidth-left{
+      width: calc(100vw ~'-' @padding-large);
+      margin-left: @padding-large;
+    }
+
+    .container-fullWidth-right{
+      width: calc(100vw ~'-' @padding-large);
+      margin-right: @padding-large;
+    }
+  }
+
+  @media (min-width: @screen-large) {
+    .container-fullWidth-left{
+      width: calc(100vw ~'-' @padding-large);
+      margin-left: @padding-large;
+    }
+
+    .container-fullWidth-right{
+      width: calc(100vw ~'-' @padding-large);
+      margin-right: @padding-large;
+    }
+  }
+}

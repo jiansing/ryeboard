@@ -1,0 +1,64 @@
+@import '/imports/ui/styles/variables/colors';
+@import '/imports/ui/styles/variables/styles';
+@import '/imports/ui/styles/variables/break-points';
+
+#render-target{
+
+  #navBar-background {
+    transition: all .3s ease-in-out;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: @color-negative;
+    width: 100%;
+    height: 50px;
+    padding-top: 1rem;
+    padding-bottom: 1.5rem;
+
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: flex-start;
+    align-items: center;
+
+    border-bottom: 1px solid transparent;
+  }
+
+  #navBar-background.active {
+    //box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .16), 0 0 2px 0 rgba(0, 0, 0, .12);
+    border-bottom: 1px solid #f0f0f0;
+    height: 40px;
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+  }
+
+  .navBar-content {
+    font-size: 1rem;
+    padding-right: .75rem;
+    padding-left: .75rem;
+  }
+
+  #navBar-logo {
+    transition: all .3s ease-in-out;
+    height: 50px;
+  }
+
+  @media (min-width: @screen-medium) {
+    #navBar-background {
+      height: 60px;
+    }
+
+    #navBar-background.active {
+      height: 50px;
+    }
+  }
+
+  @media (min-width: @screen-large) {
+    #navBar-background {
+      height: 75px;
+    }
+
+    #navBar-background.active {
+      height: 65px;
+    }
+  }
+}

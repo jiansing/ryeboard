@@ -1,0 +1,238 @@
+@import '/imports/ui/styles/variables/colors';
+@import '/imports/ui/styles/variables/break-points';
+@import '/imports/ui/styles/variables/styles';
+
+#render-target{
+
+  figure{
+    margin: 0;
+  }
+
+  input{
+    transition: all .3s ease-in-out;
+    outline: none;
+    border: 2px solid black;
+    font-size: 1.5rem;
+    padding: .5rem;
+    margin: auto;
+  }
+
+  #progress-container{
+    position: fixed;
+    display: flex;
+    bottom: 0;
+    right: 0;
+    width: 100vw;
+    padding-bottom: .25rem;
+    height: 4rem;
+    padding-top: .25rem;
+    background: white;
+    border-top: solid @color-shade 2px;
+  }
+
+  #progress-bar{
+    width: 75%;
+    margin: auto;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: flex-start;
+  }
+
+  #progress-track{
+    width: 75%;
+    margin: auto;
+    height: .25rem;
+    background: lightgray;
+  }
+
+  #progress-fill{
+    transition: width .5s ease-in;
+    height: .25rem;
+    background: @color-emphasis;
+  }
+
+  .progress-opacity{
+    transition: all .25s ease-in-out;
+  }
+  .progress-solid{
+    transform: scale(1, 1);
+    opacity: 1;
+  }
+  .progress-fade{
+    transform: scale(.95, .95);
+    opacity: .25;
+  }
+
+  ::placeholder {
+    color: #e6e6e6;
+    opacity: 1; /* Firefox */
+  }
+
+  :-ms-input-placeholder { /* Internet Explorer 10-11 */
+    color: #e6e6e6;;
+  }
+
+  .finish{
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    transition: all .25s ease-in-out;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    transform: translateY(150px);
+    margin-bottom: 2rem;
+    background: @color-shade;
+  }
+
+  .finish-show{
+    transform: translateY(-2rem);
+  }
+
+  .selected{
+    background: @color-emphasis;
+  }
+
+  #complete{
+    width: 100%;
+    height: 100%;
+    text-align: center;
+  }
+
+  /**Buttons**/
+
+  button{
+    .button-default;
+  }
+
+  button:hover{
+    background: lighten( @color-primary, 20%);
+  }
+
+  button:active{
+    background: darken(@color-primary, 20%);
+  }
+
+  /**Button - Default**/
+
+  .button-default{
+    outline: none;
+    border: transparent solid 2px;
+    margin: .5rem;
+    color: @color-text-negative;
+    background: @color-primary;
+    padding: .75rem 1.5rem;
+    font-size: 1rem;
+    transition: background .15s;
+  }
+
+  /**Button - Large**/
+  
+  .btn-large{
+    .button-default;
+    font-size: 1.25rem!important;
+  }
+
+  /**Button - Text Only**/
+
+  .btn-text{
+    .button-default;
+    background: transparent;
+    color: @color-primary
+  }
+
+  .btn-text:hover, .btn-text:active{
+    color: @color-text-negative;
+  }
+
+  /**Button - Emphasis**/
+  
+  .btn-emphasis{
+    .button-default;
+    color: @color-text-negative;
+    background: @color-emphasis;
+  }
+
+  .btn-emphasis:hover{
+    background: lighten( @color-emphasis, 10%);
+  }
+
+  .btn-emphasis:active{
+    background: darken( @color-emphasis, 10%);
+  }
+
+  /**Button - Ghost**/
+
+  .btn-ghost{
+    .button-default;
+    color: @color-primary;
+    border: @color-primary solid 2px;
+    background: @color-negative;
+  }
+
+  .btn-ghost:hover{
+    color: @color-negative;
+    background: lighten(@color-primary, 10%);
+  }
+
+  .btn-ghost:active{
+    color: @color-negative;
+    background: @color-primary;
+  }
+
+  /**Button - Red**/
+
+  .btn-red{
+    .button-default;
+    color: @color-negative;
+    border: transparent solid 2px;
+    background: @color-red;
+  }
+
+  .btn-red:hover{
+    color: @color-negative;
+    background: lighten(@color-red, 10%);
+  }
+
+  .btn-red:active{
+    color: @color-negative;
+    background: darken(@color-red, 10%);
+  }
+
+  /**Button - Blue**/
+
+  .btn-blue{
+    .button-default;
+    color: @color-negative;
+    border: transparent solid 2px;
+    background: @color-blue;
+  }
+
+  .btn-blue:hover{
+    color: @color-negative;
+    background: lighten(@color-blue, 10%);
+  }
+
+  .btn-blue:active{
+    color: @color-negative;
+    background: darken(@color-blue, 10%);
+  }
+
+  /**Button - Yellow**/
+
+  .btn-yellow{
+    .button-default;
+    color: @color-negative;
+    border: transparent solid 2px;
+    background: @color-yellow;
+  }
+
+  .btn-yellow:hover{
+    color: @color-negative;
+    background: lighten(@color-yellow, 10%);
+  }
+
+  .btn-yellow:active{
+    color: @color-negative;
+    background: darken(@color-yellow, 10%);
+  }
+}
