@@ -6,52 +6,60 @@ import * as types from '../constants/actionTypes';
 
 //***** Profile Redux Actions *****//
 
-export const addProfileCreator = (object) => {
+export const addToBoard = (object) => {
 
     return {
-        type: types.PROFILE_CREATOR_ADD,
+        type: types.BOARD_ADD,
         value: object
     }
 };
 
-export const removeProfileCreator = (path) => {
+export const removeFromBoard = (path) => {
 
     return {
-        type: types.PROFILE_CREATOR_REMOVE,
+        type: types.BOARD_REMOVE,
         value: path
     }
 };
 
-export const modifyProfileCreator = (value) => {
+export const modifyBoard = (value) => {
 
     return {
-        type: types.PROFILE_CREATOR_MODIFY,
+        type: types.BOARD_MODIFY,
         value: value
     }
 };
 
-//***** Testing Redux Actions *****//
-
-export const addTestParam = (object) => {
+export const selectWidgetFromBoard = (id) => {
 
     return {
-        type: types.TESTING_ADD,
+        type: types.BOARD_SELECT_WIDGET,
+        value: id
+    }
+};
+
+//***** Settings Redux Actions *****//
+
+export const addSettingsParam = (object) => {
+
+    return {
+        type: types.SETTINGS_ADD,
         value: object
     }
 };
 
-export const removeTestParam = (path) => {
+export const removeSettingsParam = (path) => {
 
     return {
-        type: types.TESTING_REMOVE,
+        type: types.SETTINGS_REMOVE,
         value: path
     }
 };
 
-export const modifyTestParam = (value) => {
+export const modifySettingsParam = (value) => {
 
     return {
-        type: types.TESTING_MODIFY,
+        type: types.SETTINGS_MODIFY,
         value: value
     }
 };

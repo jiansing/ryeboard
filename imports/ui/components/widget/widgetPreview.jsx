@@ -5,19 +5,22 @@ import { ResizableBox } from 'react-resizable';
 
 const widgetSource = {
     beginDrag(props) {
-        let id = Math.random(),
-            title = 'FUCK',
-            top = document.getElementById('board-container').pageYOffset || document.getElementById('board-container').scrollTop || document.getElementById('board-container').scrollTop || 0,
-            left = document.getElementById('board-container').pageXOffset || document.getElementById('board-container').scrollLeft || document.getElementById('board-container').scrollLeft || 0,
+        let newWidget = true,
+            type = props.type,
+            top = document.getElementById('board-container').pageYOffset ||
+                document.getElementById('board-container').scrollTop ||
+                document.getElementById('board-container').scrollTop || 0,
+            left = document.getElementById('board-container').pageXOffset ||
+                document.getElementById('board-container').scrollLeft ||
+                document.getElementById('board-container').scrollLeft || 0,
             width = 150,
             height = 150;
 
-        console.log(top, left);
+        console.log(this);
+        top += document.getElementById('preview-' + props.type).offsetTop;
+        left -= 75;
 
-        //top += 50;
-        left -= 60;
-
-        return { id, title, left, top, width, height }
+        return { type, left, top, width, height, newWidget }
     },
 
     /*endDrag(props, monitor, component) {
@@ -42,7 +45,7 @@ function collect(connect, monitor) {
 
 function getStyles(props) {
     return {
-        position: 'absolute',
+        position: 'relative',
         boxShadow: '0 1px 1px 0 rgba(0, 0, 0, 0.15), 0 0px 1px 0 rgba(0, 0, 0, 0.15)',
         background: 'white',
     }
@@ -68,10 +71,10 @@ class Widget extends Component {
         const { isDragging, connectDragSource } = this.props;
 
         return connectDragSource(
-            <div style={getStyles(this.props)}>
+            <div style={getStyles(this.props)} id={'preview-'+this.props.type}>
                 <div style={{textAlign: 'center'}}>
                     <div style={{width: '100%', height: '25px', background: 'black'}} />
-                    Widget
+                    {this.props.type}
                 </div>
             </div>
         );

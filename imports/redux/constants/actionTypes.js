@@ -2,11 +2,13 @@
  * Created by JohnBae on 7/1/17.
  */
 
-//Profile Creator Action Constants
-export const PROFILE_CREATOR_ADD= "PROFILE_CREATOR_ADD";
-export const PROFILE_CREATOR_REMOVE = "PROFILE_CREATOR_REMOVE";
-export const PROFILE_CREATOR_MODIFY = "PROFILE_CREATOR_MODIFY";
+//Board Creator Action Constants
+export const BOARD_ADD= "BOARD_ADD";
+export const BOARD_REMOVE = "BOARD_REMOVE";
+export const BOARD_MODIFY = "BOARD_MODIFY";
+export const BOARD_SELECT_WIDGET = "BOARD_SELECT_WIDGET";
 
-export const TESTING_MODIFY = "TESTING_MODIFY";
-export const TESTING_ADD = "TESTING_ADD";
-export const TESTING_REMOVE = "TESTING_REMOVE";
+//Settings Creator Action Constants
+export const SETTINGS_MODIFY = "SETTINGS_MODIFY";
+export const SETTINGS_ADD = "SETTINGS_ADD";
+export const SETTINGS_REMOVE = "SETTINGS_REMOVE";

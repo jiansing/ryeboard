@@ -2,9 +2,11 @@
  * Created by JohnBae on 7/1/17.
  */
 
-import testing from './testing';
+import board from './board';
+import settings from './settings';
 import { combineReducers } from 'redux'
 
 export default combineReducers({
-    testing
+    board,
+    settings
 })

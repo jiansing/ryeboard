@@ -13,6 +13,7 @@ import DragLayer from './dragLayer';
 
 const widgetTarget = {
     drop(props, monitor, component) {
+
         const delta = monitor.getDifferenceFromInitialOffset();
         const item = monitor.getItem();
 
@@ -21,7 +22,10 @@ const widgetTarget = {
 
         [left, top] = snapToGrid(left, top);
 
-        component.moveWidget(item.id, left, top)
+        console.log(item, monitor, component, left ,top);
+
+        if(item.newWidget) component.addWidget(update({left, top}, item));
+        else component.moveWidget(item.id, left, top)
     },
 };
 
@@ -33,53 +37,39 @@ function collect(connect, monitor) {
 
 class PureBoard extends Component {
 
-    constructor(props){
+    constructor(props) {
         super(props);
         this.state = {
             selected: null,
             height: '',
             width: '',
-            widgets: {
-                a: { top: 150, left: 300, height: 150, width: 150, title: 'Drag me around' },
-                b: { top: 150, left: 450, height: 150, width: 150, title: 'Drag me around' },
-            },
+            /*widgets: [
+                {id: 'a', top: 150, left: 300, height: 150, width: 150, title: 'Drag me around'},
+                {id: 'b', top: 150, left: 450, height: 150, width: 150, title: 'Drag me around'},
+            ],*/
         };
     }
 
-    componentDidMount(){
-        this.updateSize();
+    selectWidget(id) {
+        this.props.actions.selectWidgetFromBoard(id);
     }
 
-    selectWidget(id) {
-        this.setState({selected: id});
+    addWidget(data) {
+        this.props.actions.addToBoard({...data});
     }
 
     moveWidget(id, left, top) {
-        let newState = update({ widgets: {[id]:  { left: left, top: top } } }, this.state);
-        this.setState(newState);
-        this.updateSize();
+        this.props.actions.modifyBoard({id, left, top});
     }
 
     resizeWidget(id, height, width) {
-        let newState = update({ widgets: {[id]:  { height: height, width: width } } }, this.state);
-        this.setState(newState);
-        this.updateSize();
+        this.props.actions.modifyBoard({id, height, width});
     }
 
-    renderWidget(item, key) {
-        return <Widget isSelected={this.state.selected === key} key={key} id={key} {...item}
+    renderWidget(item) {
+        return <Widget key={item.id} id={item.id} {...item}
                        handleSelect={(id)=>this.selectWidget(id)}
                        handleResize={(id, height, width)=>this.resizeWidget(id, height, width)}/>
-    }
-
-    updateSize(){
-        if(this.state.height !== document.getElementById('board-container').scrollHeight + 'px' ||
-            this.state.width !== document.getElementById('board-container').scrollWidth + 'px')
-
-        this.setState({
-            height: document.getElementById('board-container').scrollHeight + 'px',
-            width: document.getElementById('board-container').scrollWidth + 'px',
-        });
     }
 
     render() {
@@ -88,25 +78,27 @@ class PureBoard extends Component {
 
         const style = {
             position: 'relative',
-            height: '2500px',
-            width: '2500px',
+            height: '2000px',
+            width: '2000px',
             backgroundColor: '#D9D3CD',
             backgroundImage: 'url("/grid.svg")',
             backgroundRepeat: 'repeat',
             backgroundSize: '15px 15px',
             overflow: 'hidden',
-        }
+        };
 
         const { connectDropTarget } = this.props;
 
-        const { widgets } = this.state;
+        const widgets = this.props.widgets;
+
+        console.log(widgets);
 
         return connectDropTarget(
             <div id='board-container'
                  style={{marginTop: '50px', marginLeft: '75px', width: 'calc(100vw - 75px)', height: 'calc(100vh - 50px)', overflow: 'scroll'}}>
                 <DragLayer />
                 <div style={style} ref={(container) => this.container= container}>
-                    {Object.keys(widgets).map(key => this.renderWidget(widgets[key], key))}
+                    {widgets.map(widget => this.renderWidget(widget))}
                 </div>
             </div>
 
@@ -120,7 +112,8 @@ function selector(dispatch) {
     return (nextState, nextOwnProps) => {
 
         const nextResult = {
-
+            actions: actions,
+            widgets: nextState.board
         };
 
         if(!equals(nextResult, result)){

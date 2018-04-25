@@ -6,8 +6,8 @@ import { ResizableBox } from 'react-resizable';
 const widgetSource = {
 
     beginDrag(props) {
-        const { id, title, left, top, width, height } = props;
-        return { id, title, left, top, width, height }
+        const { id, type, left, top, width, height } = props;
+        return { id, type, left, top, width, height }
     },
 
     /*endDrag(props, monitor, component) {
@@ -43,7 +43,7 @@ function getStyles(props) {
         // because IE will ignore our custom "empty image" drag preview.
         opacity: isDragging ? 0 : 1,
         height: isDragging ? 0 : '',
-        zIndex: props.isSelected ? 1 : 0,
+        zIndex: 1,
         boxShadow: preview ?
             '0 2px 2px 0 rgba(0, 0, 0, 0.25), 0 0px 2px 0 rgba(0, 0, 0, 0.25)' :
             '0 1px 1px 0 rgba(0, 0, 0, 0.15), 0 0px 1px 0 rgba(0, 0, 0, 0.15)',
@@ -93,13 +93,10 @@ class Widget extends Component {
         return connectDragSource(
             <div style={getStyles(this.props)}>
                 <div>
-                    <ResizableBox width={this.props.width || 150} height={this.props.height || 150} minConstraints={[150, 150]} maxConstraints={[300, 300]}
+                    <ResizableBox width={this.props.width || 150} height={this.props.height || 150} minConstraints={[150, 150]} maxConstraints={[450, 450]}
                                   draggableOpts={{grid: [15, 15]}} onResizeStart={(event)=>this.preventDndOnResize(event)}
                                   onResizeStop={(event, data)=>this.saveResize(event, data)} onMouseDown={()=> this.props.handleSelect(id)}>
-                        <div style={{height: '100%'}}>
-                            I am a draggable card number [{id}]
-                            {isDragging ? ' (and I am being dragged now)' : 'and I am still'}
-                        </div>
+                        {this.props.children}
                     </ResizableBox>
                 </div>
             </div>

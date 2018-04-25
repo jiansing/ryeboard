@@ -13,21 +13,20 @@ function selection(state = DEFAULT_STATE, action) {
 
     switch (action.type) {
 
-        case types.TESTING_MODIFY: {
+        case types.SETTINGS_ADD: {
+            let newState = JSON.parse(JSON.stringify(state));
+            newState[action.value.key] = action.value.obj;
+            return newState;
+    }
+
+        case types.SETTINGS_REMOVE: {
+            let newState = JSON.parse(JSON.stringify(state));
+            delete newState[action.value];
+            return newState;
+        }
+
+        case types.SETTINGS_MODIFY: {
             return deepChange(action.value, state);
-        }
-
-        case types.TESTING_ADD: {
-            let newState = JSON.parse(JSON.stringify(state));
-            newState.game[action.key] = action.obj;
-            return newState;
-        }
-
-        case types.TESTING_REMOVE: {
-            let newState = JSON.parse(JSON.stringify(state));
-            newState.game[action.path] = action.data;
-            console.log("ACTION CHECK", action, newState);
-            return newState;
         }
 
         default:
