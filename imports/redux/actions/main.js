@@ -30,11 +30,18 @@ export const modifyBoard = (value) => {
     }
 };
 
-export const selectWidgetFromBoard = (id) => {
+export const selectWidgetFromBoard = (id, data) => {
 
     return {
         type: types.BOARD_SELECT_WIDGET,
-        value: id
+        value: {id, data}
+    }
+};
+
+export const deselectWidgetFromBoard = () => {
+
+    return {
+        type: types.BOARD_DESELECT_WIDGET,
     }
 };
 

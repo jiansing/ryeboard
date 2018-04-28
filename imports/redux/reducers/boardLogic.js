@@ -6,27 +6,23 @@ import * as types from '../constants/actionTypes';
 import deepChange from 'updeep';
 
 const DEFAULT_STATE = {
-    loggedIn: false,
+    selected: null,
 };
 
 function selection(state = DEFAULT_STATE, action) {
 
     switch (action.type) {
 
-        case types.SETTINGS_ADD: {
+        case types.BOARD_SELECT_WIDGET: {
             let newState = JSON.parse(JSON.stringify(state));
-            newState[action.value.key] = action.value.obj;
+            newState.selected = action.value;
             return newState;
         }
 
-        case types.SETTINGS_REMOVE: {
+        case types.BOARD_DESELECT_WIDGET: {
             let newState = JSON.parse(JSON.stringify(state));
-            delete newState[action.value];
+            newState.selected = null;
             return newState;
-        }
-
-        case types.SETTINGS_MODIFY: {
-            return deepChange(action.value, state);
         }
 
         default:

@@ -1,8 +1,6 @@
 import React, { Component } from 'react'
-import PropTypes from 'prop-types'
 import { DragLayer } from 'react-dnd'
 import snapToGrid from '/imports/helper/snapToGrid'
-
 import Widget from '../widget/main';
 
 const layerStyles = {
@@ -13,7 +11,7 @@ const layerStyles = {
     top: 0,
     width: '100%',
     height: '100%',
-}
+};
 
 function getItemStyles(props) {
     const { initialOffset, currentOffset } = props;
@@ -24,14 +22,6 @@ function getItemStyles(props) {
     }
 
     let { x, y } = currentOffset
-
-    if (props.snapToGrid) {
-        x -= initialOffset.x;
-        y -= initialOffset.y;
-        ;[x, y] = snapToGrid(x, y);
-        x += initialOffset.x;
-        y += initialOffset.y;
-    }
 
     const transform = `translate(${x}px, ${y}px)`;
     return {
@@ -47,11 +37,11 @@ class CustomDragLayer extends Component {
         switch (type) {
             case 'widget':
                 return  <Widget key={item.key} id={item.id} type={item.type}
-                                preview
+                                data={item.data}
                                 width={item.width} height={item.height}/>;
             case 'widgetPreview':
                 return  <Widget key={item.key} id={item.id} type={item.type}
-                                preview
+                                preview data={item.data}
                                 width={item.width} height={item.height}/>;
             default:
                 return null;

@@ -15,7 +15,6 @@ function selection(state = DEFAULT_STATE, action) {
             let newState = state.slice();
             let id = setId(state);
             newState.push({id, ...action.value});
-            console.log(id, newState);
             return newState;
         }
 
@@ -35,8 +34,9 @@ function selection(state = DEFAULT_STATE, action) {
         }
 
         case types.BOARD_SELECT_WIDGET: {
+            if(action.value === null) return state;
             let newState = state.slice();
-            let pos = state.findIndex((elem) => elem.id === action.value);
+            let pos = state.findIndex((elem) => elem.id === action.value.id);
             let selectedWidget = newState[pos];
             newState.splice(pos, 1);
             newState.splice(state.length - 1, 0, selectedWidget);

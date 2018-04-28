@@ -7,17 +7,9 @@ const widgetSource = {
 
     beginDrag(props) {
         const { id, type, left, top, width, height } = props;
+        props.handleSelect(id);
         return { id, type, left, top, width, height }
-    },
-
-    /*endDrag(props, monitor, component) {
-        if (!monitor.didDrop()) {
-            return;
-        }
-
-        const item = monitor.getItem();
-        const dropResult = monitor.getDropResult();
-    }*/
+    }
 };
 
 
@@ -32,18 +24,17 @@ function collect(connect, monitor) {
 
 function getStyles(props) {
 
-    const {left, top, isDragging, preview} = props;
+    const {left, top, isDragging, preview, selected} = props;
     const transform = `translate3d(${left}px, ${top}px, 0)`;
 
     return {
         position: 'absolute',
         transform,
         WebkitTransform: transform,
-        // IE fallback: hide the real node using CSS when dragging
-        // because IE will ignore our custom "empty image" drag preview.
         opacity: isDragging ? 0 : 1,
         height: isDragging ? 0 : '',
         zIndex: 1,
+        outline: selected ? '2px dodgerBlue solid' : '2px transparent solid',
         boxShadow: preview ?
             '0 2px 2px 0 rgba(0, 0, 0, 0.25), 0 0px 2px 0 rgba(0, 0, 0, 0.25)' :
             '0 1px 1px 0 rgba(0, 0, 0, 0.15), 0 0px 1px 0 rgba(0, 0, 0, 0.15)',
@@ -65,8 +56,11 @@ class Widget extends Component {
     }
 
     preventDndOnResize(event){
+        this.props.handleSelect(this.props.id);
+        document.activeElement.blur();
         event.stopPropagation();
         event.preventDefault();
+        this.props.handleResize()
     }
 
     saveResize(event, data){
@@ -88,14 +82,27 @@ class Widget extends Component {
 
         const { id } = this.props;
 
-        const { isDragging, connectDragSource } = this.props;
+        const { connectDragSource } = this.props;
 
         return connectDragSource(
             <div style={getStyles(this.props)}>
                 <div>
-                    <ResizableBox width={this.props.width || 150} height={this.props.height || 150} minConstraints={[150, 150]} maxConstraints={[450, 450]}
-                                  draggableOpts={{grid: [15, 15]}} onResizeStart={(event)=>this.preventDndOnResize(event)}
-                                  onResizeStop={(event, data)=>this.saveResize(event, data)} onMouseDown={()=> this.props.handleSelect(id)}>
+                    <ResizableBox width={this.props.width || 300} height={this.props.height || 150} minConstraints={[150, 150]} maxConstraints={[945, 945]}
+                                  onClick={()=> {
+                                      console.log(this.dragging);
+                                      if(this.dragging) return '';
+                                      this.props.handleSelect(id, this.props.menu)
+                                  }}
+                                  onMouseUp={()=> {
+                                      console.log('mouse up!');
+                                      this.dragging = false;
+                                  }}
+                                  onDrag={()=>{
+                                      console.log('dragging~!');
+                                      this.dragging = true;
+                                  }}
+                                  onResizeStart={(event)=>this.preventDndOnResize(event)}
+                                  onResizeStop={(event, data)=>this.saveResize(event, data)}>
                         {this.props.children}
                     </ResizableBox>
                 </div>

@@ -7,30 +7,21 @@ const widgetSource = {
     beginDrag(props) {
         let newWidget = true,
             type = props.type,
+            data = props.data,
             top = document.getElementById('board-container').pageYOffset ||
                 document.getElementById('board-container').scrollTop ||
                 document.getElementById('board-container').scrollTop || 0,
             left = document.getElementById('board-container').pageXOffset ||
                 document.getElementById('board-container').scrollLeft ||
                 document.getElementById('board-container').scrollLeft || 0,
-            width = 150,
-            height = 150;
+            width = props.width || 150,
+            height = props.height || 150;
 
-        console.log(this);
         top += document.getElementById('preview-' + props.type).offsetTop;
         left -= 75;
 
-        return { type, left, top, width, height, newWidget }
+        return { type, data, left, top, width, height, newWidget }
     },
-
-    /*endDrag(props, monitor, component) {
-        if (!monitor.didDrop()) {
-            return;
-        }
-
-        const item = monitor.getItem();
-        const dropResult = monitor.getDropResult();
-    }*/
 };
 
 
@@ -68,7 +59,7 @@ class Widget extends Component {
 
         const { id } = this.props;
 
-        const { isDragging, connectDragSource } = this.props;
+        const { connectDragSource } = this.props;
 
         return connectDragSource(
             <div style={getStyles(this.props)} id={'preview-'+this.props.type}>

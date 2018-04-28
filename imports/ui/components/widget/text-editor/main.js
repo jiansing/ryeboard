@@ -4,17 +4,133 @@
 
 import React, {Component} from 'react';
 import Core from '../core';
+import {connectAdvanced} from "react-redux";
+import equals from 'fast-deep-equal';
+import {bindActionCreators} from 'redux';
+import * as Actions from "/imports/redux/actions/main";
+import {Editor, EditorState, RichUtils} from 'draft-js';
+import 'draft-js/dist/Draft.css'
 
-export default class Preview extends Component{
-    constructor(props){
+class PureTextEditor extends Component{
+    constructor(props) {
         super(props);
+        this.state = {focused: false};
+        this.handleKeyCommand = this.handleKeyCommand.bind(this);
+    }
+
+    componentDidMount(){
+        if(this.props.editorState === null){
+            let id = this.props.id;
+            this.props.actions.modifyBoard({id, data: {editorState: EditorState.createEmpty()}})
+        }
+    }
+
+    handleEdit(editorState){
+        let id = this.props.id;
+        this.props.actions.modifyBoard({id, data: {editorState: editorState}})
+    }
+
+    handleKeyCommand(command, editorState) {
+        const newState = RichUtils.handleKeyCommand(editorState, command);
+        if (newState) {
+            this.handleEdit(newState);
+            return 'handled';
+        }
+        return 'not-handled';
+    }
+
+    onBoldClick() {
+        const newState = RichUtils.toggleInlineStyle(this.props.editorState, 'BOLD');
+        if(newState)  this.handleEdit(newState);
+    }
+
+    onItalicClick() {
+        const newState = RichUtils.toggleInlineStyle(this.props.editorState, 'ITALIC');
+        if(newState)  this.handleEdit(newState);
+    }
+
+    onUnderlineClick() {
+        const newState = RichUtils.toggleInlineStyle(this.props.editorState, 'UNDERLINE');
+        if(newState)  this.handleEdit(newState);
+    }
+
+    onCodeClick() {
+        const newState = RichUtils.toggleInlineStyle(this.props.editorState, 'CODE');
+        if(newState)  this.handleEdit(newState);
+    }
+
+
+    compileMenu(){
+        let bold = {
+            icon: null,
+            title: 'bold',
+            fun: ()=> this.onBoldClick()
+            },
+            italic = {
+                icon: null,
+                title: 'italic',
+                fun: ()=> this.onItalicClick()
+            },
+            underline = {
+                icon: null,
+                title: 'underline',
+                fun: ()=> this.onUnderlineClick()
+            }
+
+        return [bold, italic, underline];
     }
 
     render(){
         return(
-            <Core {...this.props}>
-                Hello there! I'm Text Editor
+            <Core menu={this.compileMenu()}selected={this.state.focused} {...this.props}>
+                <div style={{position: 'absolute', height: '100%', width: '100%', background: 'transparent', zIndex: this.state.focused ? 0 : 3}}
+                     onClick={()=> {
+                         console.log("clicked on:", this.props.id);
+                         this.editor.focus()
+                     }}/>
+                <div style={{height: '100%', width: '100%', overflow: 'scroll', padding: '10px'}}>
+                    <Editor editorState={this.props.editorState}
+                            onBlur={()=>{
+                                this.setState({focused: false})
+                                this.props.actions.deselectWidgetFromBoard();
+                            }}
+                            onFocus={()=>{
+                                this.setState({focused: true})
+                                this.props.handleSelect(this.props.id);
+                            }}
+                            onChange={(editorState)=>this.handleEdit(editorState)}
+                            handleKeyCommand={this.handleKeyCommand}
+                            handleDrop={()=>true} placeholder={'write something!'}
+                            ref={(editor)=> this.editor = editor}/>
+                </div>
             </Core>
         )
     }
 }
+
+function selector(dispatch) {
+    let result = {};
+    const actions = bindActionCreators(Actions, dispatch);
+    return (nextState, nextOwnProps) => {
+
+        const nextResult = {
+            actions: actions,
+            editorState: function() {
+                if(nextOwnProps.data && nextOwnProps.data.editorState) return nextOwnProps.data.editorState;
+                let editor = nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id);
+                if(editor && editor.data) {
+                    return editor.data.editorState;
+                }
+                else return null;
+            }(),
+            ...nextOwnProps
+        };
+
+        if(!equals(nextResult, result)){
+            result = nextResult;
+        }
+        return result
+    }
+}
+
+export default connectAdvanced(selector)(PureTextEditor)

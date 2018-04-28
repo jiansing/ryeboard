@@ -4,6 +4,33 @@
 
 #render-target {
 
+  #board{
+    transition: all .5s;
+    position: relative;
+    height: 2000px;
+    width: 2000px;
+    overflow: hidden;
+    cursor: default;
+    background-color: #D9D3CD;
+  }
+
+  .grid {
+    transition: opacity ease-in .25s;
+    background-image: url("/grid.svg");
+    background-repeat: repeat;
+    background-size: 15px 15px;
+  }
+
+  .show{
+    opacity: 1;
+    z-index: 0;
+  }
+
+  .hide{
+    opacity: 0;
+    z-index: 0;
+  }
+
   .animatedImage {
     display: inline-block;
     animation: animate-image 2s cubic-bezier(.68, .01, .01, .99) 0s infinite;

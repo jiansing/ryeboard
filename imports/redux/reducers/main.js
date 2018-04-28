@@ -2,11 +2,13 @@
  * Created by JohnBae on 7/1/17.
  */
 
-import board from './board';
+import boardLayout from './boardLayout';
+import boardLogic from './boardLogic';
 import settings from './settings';
 import { combineReducers } from 'redux'
 
 export default combineReducers({
-    board,
+    boardLayout,
+    boardLogic,
     settings
 })

@@ -4,6 +4,7 @@
 
 import React, {Component} from 'react';
 import PreviewCore from '../widgetPreview';
+import {EditorState} from 'draft-js';
 
 export default class Preview extends Component{
     constructor(props){
@@ -12,7 +13,7 @@ export default class Preview extends Component{
 
     render(){
         return(
-            <PreviewCore type={'text-editor'}/>
+            <PreviewCore height={150} width={300} type={'text-editor'} data={{editorState: EditorState.createEmpty()}}/>
         )
     }
 }
