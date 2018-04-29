@@ -18,7 +18,7 @@ class PureMenu extends Component {
     renderPreviews(){
         return previews.map(function(Elem){
             return (
-                <div key={Math.random()} style={{margin: '1rem'}}>
+                <div key={Math.random()} style={{padding: '5px', width: '100%'}}>
                     <Elem />
                 </div>
             )
@@ -31,10 +31,10 @@ class PureMenu extends Component {
         return this.props.currentMenu.map(function(elem){
             if(!elem.condition(self.props.currentContext.data)) return '';
             return (
-                <div style={{textAlign: 'center'}} key={elem.title(self.props.currentContext.data)}>
-                    <button onClick={()=>{
+                <div style={{textAlign: 'center', width: '100%', padding: '5px'}} key={elem.title(self.props.currentContext.data)}>
+                    <img src={'/ph.svg'} height={25} width={25} onClick={()=>{
                         elem.fun(self.props.currentContext.data);
-                    }} onMouseDown={(event)=>event.preventDefault()}/>
+                    }}/>
                     <p style={{margin: '0'}}>{elem.title(self.props.currentContext.data)}</p>
                 </div>
             )
@@ -49,11 +49,11 @@ class PureMenu extends Component {
             <div style={{background: '#F2F2F2', marginTop: '50px', height: 'calc(100vh - 50px)', display: 'flex', position: 'fixed', top: 0,
                 left: 0, width: '75px', zIndex: 4, boxShadow: '0 1px 1px 0 rgba(0, 0, 0, 0.15), 0 0px 1px 0 rgba(0, 0, 0, 0.15)'}}>
                 {this.props.currentMenu === null ?
-                    <div style={{height: '100%', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                    <div style={{height: '100%', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '1rem'}}>
                         {this.renderPreviews()}
                     </div> :
                     <div onMouseDown={(event)=>event.preventDefault()}
-                         style={{height: '100%', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                         style={{height: '100%', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '1rem'}}>
                         {this.renderMenu()}
                     </div>
                 }

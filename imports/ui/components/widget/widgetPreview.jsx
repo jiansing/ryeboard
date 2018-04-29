@@ -38,6 +38,7 @@ const styles = {
     position: 'relative',
     background: 'transparent',
     width: '100%'
+
 }
 
 
@@ -63,7 +64,7 @@ class Widget extends Component {
             <div style={styles} id={'preview-'+this.props.type}>
                 <div style={{textAlign: 'center'}}>
                     <img src={'/ph.svg'} height={25} width={25} />
-                    {this.props.type}
+                    <p style={{margin: '0'}}>{this.props.type}</p>
                 </div>
             </div>
         );
