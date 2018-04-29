@@ -103,10 +103,7 @@ class PureImageViewer extends Component{
 
     compileMenu(context){
         let ratio = {
-            condition: (data)=> {
-                console.log(data !== 'undefined', typeof data.image !== 'undefined', data.image);
-                return typeof data !== 'undefined' && typeof data.image !== 'undefined' && data.image
-            },
+            condition: (data)=> typeof data !== 'undefined' && typeof data.image !== 'undefined' && data.image,
             icon: null,
             title: (data) => {if(data) return data.ratio ? 'unset ratio' : 'set ratio'},
             fun: (data)=> {if(data)  return data.ratio ? this.unlockAspectRatio() : this.lockAspectRatio()}

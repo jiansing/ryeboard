@@ -62,16 +62,19 @@ class PureTextEditor extends Component{
 
     compileMenu(){
         let bold = {
-            icon: null,
-            title: ()=> 'bold',
-            fun: ()=> this.onBoldClick()
+                condition: ()=> true,
+                icon: null,
+                title: ()=> 'bold',
+                fun: ()=> this.onBoldClick()
             },
             italic = {
+                condition: ()=> true,
                 icon: null,
                 title: () => 'italic',
                 fun: ()=> this.onItalicClick()
             },
             underline = {
+                condition: ()=> true,
                 icon: null,
                 title: () => 'underline',
                 fun: ()=> this.onUnderlineClick()
@@ -80,14 +83,36 @@ class PureTextEditor extends Component{
         return [bold, italic, underline];
     }
 
+    handleKey(event){
+        let key = event.keyCode;
+
+        switch(key){
+            case 8 : {
+                this.props.actions.removeFromBoard(this.props.id);
+            }
+        }
+    }
+
     render(){
         return(
             <Core selected={this.state.focused} {...this.props}>
                 <div style={{position: 'absolute', height: '100%', width: '100%', zIndex: this.state.focused ? -1 : 3}}
-                     onClick={()=> {
-                         this.editor.focus()
+                     onClick={(event)=> {
+                         console.log(event.shiftKey);
+                         if(event.shiftKey) this.focusSink.focus();
+                         else this.editor.focus();
                      }}/>
-                <div style={{height: '100%', width: '100%', overflowY: 'auto', padding: '15px'}}>
+                <div style={{height: '100%', width: '100%', overflowY: 'auto', padding: '15px', outline: 'none'}} tabIndex={-1}
+                     ref={(focusSink)=>this.focusSink = focusSink}
+                     onKeyUp={(event)=>this.handleKey(event)}
+                     onBlur={()=>{
+                         this.props.actions.deselectWidgetFromBoard();
+                         this.setState({focused: false});
+                     }}
+                     onFocus={()=>{
+                         this.props.handleSelect(this.props.id, this.compileMenu());
+                         this.setState({focused: true});
+                     }}>
                     <Editor editorState={this.props.editorState}
                             onBlur={()=>{
                                 this.props.actions.deselectWidgetFromBoard();
