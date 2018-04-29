@@ -71,7 +71,6 @@ function selector(dispatch) {
                 nextState.boardLogic.selected.data : null,
             currentContext: nextState.boardLogic.selected ? function(){
                 let selectedWidget = nextState.boardLayout.findIndex((elem) => elem.id === nextState.boardLogic.selected.id);
-                console.log(nextState.boardLayout[selectedWidget]);
                 return  nextState.boardLayout[selectedWidget];
             }() : null,
         };
