@@ -13,8 +13,42 @@ import { NativeTypes } from 'react-dnd-html5-backend';
 const widgetTarget = {
     drop(props, monitor, component) {
 
-        const delta = monitor.getDifferenceFromInitialOffset();
+        const hasDroppedOnChild = monitor.isOver(({ shallow: false }));
+        if (!hasDroppedOnChild) {
+            return
+        }
+
         const item = monitor.getItem();
+
+        if(item.files){
+
+            let {x, y} = monitor.getClientOffset(),
+                top = document.getElementById('board-container').pageYOffset ||
+                    document.getElementById('board-container').scrollTop ||
+                    document.getElementById('board-container').scrollTop || 0,
+                left = document.getElementById('board-container').pageXOffset ||
+                    document.getElementById('board-container').scrollLeft ||
+                    document.getElementById('board-container').scrollLeft || 0;
+
+            let data  = URL.createObjectURL(monitor.getItem().files[0]);
+            component.addImageWidget({data: {image: data}, left: x + left - 75, top: y + top - 50, height: 150, width: 150, type: 'image'});
+            return;
+        }
+        if(item.urls){
+            let {x, y} = monitor.getClientOffset(),
+                top = document.getElementById('board-container').pageYOffset ||
+                    document.getElementById('board-container').scrollTop ||
+                    document.getElementById('board-container').scrollTop || 0,
+                left = document.getElementById('board-container').pageXOffset ||
+                    document.getElementById('board-container').scrollLeft ||
+                    document.getElementById('board-container').scrollLeft || 0;
+
+            let data  = item.urls[0];
+            component.addImageWidget({data: {image: data}, left: x + left - 75, top: y + top - 50, height: 150, width: 150, type: 'image'});
+            return;
+        }
+
+        const delta = monitor.getDifferenceFromInitialOffset();
 
         let left = Math.round(item.left + delta.x);
         let top = Math.round(item.top + delta.y);
@@ -76,6 +110,10 @@ class PureBoard extends Component {
         this.props.actions.selectWidgetFromBoard(id, data);
     }
 
+    addImageWidget(data){
+        this.props.actions.addToBoard({...data});
+    }
+
     addWidget(data) {
         this.props.actions.addToBoard({...data});
     }
@@ -135,5 +173,5 @@ function selector(dispatch) {
     }
 }
 
-let dndBoard =  DropTarget(['widget', 'widgetPreview', NativeTypes.FILE], widgetTarget, collect)(PureBoard);
+let dndBoard =  DropTarget(['widget', 'widgetPreview', NativeTypes.FILE, NativeTypes.URL], widgetTarget, collect)(PureBoard);
 export default connectAdvanced(selector)(dndBoard)

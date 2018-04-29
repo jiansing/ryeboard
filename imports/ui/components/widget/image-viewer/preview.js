@@ -12,7 +12,7 @@ export default class Preview extends Component{
 
     render(){
         return(
-            <PreviewCore type={'image-viewer'}/>
+            <PreviewCore type={'image'}/>
         )
     }
 }

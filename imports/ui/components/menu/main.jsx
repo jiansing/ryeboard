@@ -18,18 +18,24 @@ class PureMenu extends Component {
     renderPreviews(){
         return previews.map(function(Elem){
             return (
-                <Elem key={Math.random()}/>
+                <div key={Math.random()} style={{margin: '1rem'}}>
+                    <Elem />
+                </div>
             )
         })
     }
 
     renderMenu(){
-        console.log(this.props.currentMenu)
+
+        let self = this;
         return this.props.currentMenu.map(function(elem){
+            if(!elem.condition(self.props.currentContext.data)) return '';
             return (
-                <div style={{textAlign: 'center'}} key={elem.title}>
-                    <button onClick={()=>elem.fun()} onMouseDown={(event)=>event.preventDefault()}/>
-                    <p style={{margin: '0'}}>{elem.title}</p>
+                <div style={{textAlign: 'center'}} key={elem.title(self.props.currentContext.data)}>
+                    <button onClick={()=>{
+                        elem.fun(self.props.currentContext.data);
+                    }} onMouseDown={(event)=>event.preventDefault()}/>
+                    <p style={{margin: '0'}}>{elem.title(self.props.currentContext.data)}</p>
                 </div>
             )
         })
@@ -37,7 +43,7 @@ class PureMenu extends Component {
 
     render() {
 
-        console.log("SHOWING MENU FOR:", document.activeElement);
+        //console.log(this.props.currentMenu);
 
         return (
             <div style={{background: '#F2F2F2', marginTop: '50px', height: 'calc(100vh - 50px)', display: 'flex', position: 'fixed', top: 0,
@@ -60,10 +66,14 @@ function selector(dispatch) {
     let result = {};
     const actions = bindActionCreators(Actions, dispatch);
     return (nextState, nextOwnProps) => {
-        console.log(document.body, document.activeElement, document.activeElement === document.body);
         const nextResult = {
             currentMenu: nextState.boardLogic.selected && nextState.boardLogic.selected.data && document.body !== document.activeElement ?
-                nextState.boardLogic.selected.data : null
+                nextState.boardLogic.selected.data : null,
+            currentContext: nextState.boardLogic.selected ? function(){
+                let selectedWidget = nextState.boardLayout.findIndex((elem) => elem.id === nextState.boardLogic.selected.id);
+                console.log(nextState.boardLayout[selectedWidget]);
+                return  nextState.boardLayout[selectedWidget];
+            }() : null,
         };
 
         if(!equals(nextResult, result)){

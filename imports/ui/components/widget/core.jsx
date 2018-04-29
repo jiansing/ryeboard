@@ -8,6 +8,7 @@ const widgetSource = {
     beginDrag(props) {
         const { id, type, left, top, width, height } = props;
         props.handleSelect(id);
+        document.activeElement.blur();
         return { id, type, left, top, width, height }
     }
 };
@@ -18,7 +19,6 @@ function collect(connect, monitor) {
         connectDragSource: connect.dragSource(),
         connectDragPreview: connect.dragPreview(),
         isDragging: monitor.isDragging(),
-        didDrop: monitor.didDrop(),
     };
 }
 
@@ -47,6 +47,7 @@ class Widget extends Component {
 
     constructor(props){
         super(props);
+        this.state = {focused: false}
     }
 
     componentDidMount() {
@@ -75,34 +76,24 @@ class Widget extends Component {
         if(heightOffset > 7)  height += 15 - heightOffset;
         else height -= heightOffset;
 
+        console.log("SAVING AS:", width, height);
+
         this.props.handleResize(this.props.id, height, width);
     }
 
     render() {
 
-        const { id } = this.props;
-
-        const { connectDragSource } = this.props;
+        const { id, connectDragSource, resizeOpts } = this.props;
 
         return connectDragSource(
             <div style={getStyles(this.props)}>
                 <div>
-                    <ResizableBox width={this.props.width || 300} height={this.props.height || 150} minConstraints={[150, 150]} maxConstraints={[945, 945]}
-                                  onClick={()=> {
-                                      console.log(this.dragging);
-                                      if(this.dragging) return '';
-                                      this.props.handleSelect(id, this.props.menu)
-                                  }}
-                                  onMouseUp={()=> {
-                                      console.log('mouse up!');
-                                      this.dragging = false;
-                                  }}
-                                  onDrag={()=>{
-                                      console.log('dragging~!');
-                                      this.dragging = true;
-                                  }}
+                    <ResizableBox width={this.props.width || 300} height={this.props.height || 150}
+                                  minConstraints={this.props.minSize || [90, 90]}
+                                  maxConstraints={this.props.maxSize || [Infinity, Infinity]}
                                   onResizeStart={(event)=>this.preventDndOnResize(event)}
-                                  onResizeStop={(event, data)=>this.saveResize(event, data)}>
+                                  onResizeStop={(event, data)=>this.saveResize(event, data)}
+                                  {...resizeOpts}>
                         {this.props.children}
                     </ResizableBox>
                 </div>

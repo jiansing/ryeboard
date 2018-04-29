@@ -37,7 +37,7 @@ class CustomDragLayer extends Component {
         switch (type) {
             case 'widget':
                 return  <Widget key={item.key} id={item.id} type={item.type}
-                                data={item.data}
+                                preview data={item.data}
                                 width={item.width} height={item.height}/>;
             case 'widgetPreview':
                 return  <Widget key={item.key} id={item.id} type={item.type}

@@ -18,7 +18,7 @@ const widgetSource = {
             height = props.height || 150;
 
         top += document.getElementById('preview-' + props.type).offsetTop;
-        left -= 75;
+        left -= 60;
 
         return { type, data, left, top, width, height, newWidget }
     },
@@ -34,12 +34,10 @@ function collect(connect, monitor) {
     };
 }
 
-function getStyles(props) {
-    return {
-        position: 'relative',
-        boxShadow: '0 1px 1px 0 rgba(0, 0, 0, 0.15), 0 0px 1px 0 rgba(0, 0, 0, 0.15)',
-        background: 'white',
-    }
+const styles = {
+    position: 'relative',
+    background: 'transparent',
+    width: '100%'
 }
 
 
@@ -62,9 +60,9 @@ class Widget extends Component {
         const { connectDragSource } = this.props;
 
         return connectDragSource(
-            <div style={getStyles(this.props)} id={'preview-'+this.props.type}>
+            <div style={styles} id={'preview-'+this.props.type}>
                 <div style={{textAlign: 'center'}}>
-                    <div style={{width: '100%', height: '25px', background: 'black'}} />
+                    <img src={'/ph.svg'} height={25} width={25} />
                     {this.props.type}
                 </div>
             </div>

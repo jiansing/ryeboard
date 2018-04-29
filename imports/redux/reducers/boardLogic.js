@@ -20,8 +20,16 @@ function selection(state = DEFAULT_STATE, action) {
         }
 
         case types.BOARD_DESELECT_WIDGET: {
+            console.log('deselecting');
             let newState = JSON.parse(JSON.stringify(state));
             newState.selected = null;
+            return newState;
+        }
+
+        case types.BOARD_REMOVE: {
+            let newState = JSON.parse(JSON.stringify(state));
+            if(action.value === state.selected.id) newState.selected = null;
+            else return state;
             return newState;
         }
 

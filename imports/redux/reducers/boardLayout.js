@@ -21,7 +21,8 @@ function selection(state = DEFAULT_STATE, action) {
         case types.BOARD_REMOVE: {
             let newState = state.slice();
             let pos = state.findIndex((elem) => elem.id === action.value);
-            newState.slice(pos, 1);
+            newState.splice(pos, 1);
+            console.log('removing from board...', action.value, pos, newState, state);
             return newState;
         }
 
@@ -30,6 +31,7 @@ function selection(state = DEFAULT_STATE, action) {
             let pos = state.findIndex((elem) => elem.id === action.value.id);
             let widget = newState[pos];
             newState[pos] = deepChange(action.value, widget);
+            console.log('modifying board:', newState, state);
             return newState;
         }
 

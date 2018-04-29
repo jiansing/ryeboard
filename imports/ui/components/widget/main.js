@@ -22,10 +22,10 @@ export default class Widget extends Component {
     render(){
 
         switch(this.props.type){
-            case 'text-editor' : return(
+            case 'note' : return(
                 <TextEditor {...this.props}/>
             )
-            case 'image-viewer' : return(
+            case 'image' : return(
                 <ImageViewer {...this.props}/>
             )
         }
