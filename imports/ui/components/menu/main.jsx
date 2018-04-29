@@ -29,7 +29,10 @@ class PureMenu extends Component {
 
         let self = this;
         return this.props.currentMenu.map(function(elem){
-            if(!elem.condition(self.props.currentContext.data)) return '';
+            if(!elem.condition(self.props.currentContext.data)) {
+                console.log(self.props.currentContext.data);
+                return '';
+            }
             return (
                 <div style={{textAlign: 'center'}} key={elem.title(self.props.currentContext.data)}>
                     <button onClick={()=>{
