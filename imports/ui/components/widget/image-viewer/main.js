@@ -144,7 +144,7 @@ class PureImageViewer extends Component{
                                  this.preview.focus()
                              }}/>
                         <div style={{width: '100%', height: '100%', outline: 'none'}}>
-                            {this.props.imageData && !this.props.preview ?
+                            {this.props.imageData ?
                                 <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center',
                                     height: '100%', width: '100%', textAlign: 'center', outline: 'none'}}
                                      tabIndex={-1} ref={(preview) => this.preview = preview}
@@ -171,7 +171,7 @@ class PureImageViewer extends Component{
                                          this.props.handleSelect(this.props.id, this.compileMenu());
                                          this.setState({focused: true});
                                      }}>
-                                    <h4>{this.props.preview ? 'Image' : 'Drag an Image here'}</h4>
+                                    <h4>Drag an Image here</h4>
                                 </div>}
                         </div>
                     </div>
