@@ -85,13 +85,16 @@ class PureTextEditor extends Component{
 
     handleKey(event){
         let key = event.keyCode;
-        
+
         if(this.focusSink===document.activeElement)
         switch(key){
             case 8 : {
                 this.props.actions.removeFromBoard(this.props.id);
+                this.props.actions.setMutable();
             }
         }
+
+        event.stopPropagation();
     }
 
     render(){
@@ -99,7 +102,6 @@ class PureTextEditor extends Component{
             <Core selected={this.state.focused} {...this.props}>
                 <div style={{position: 'absolute', height: '100%', width: '100%', zIndex: this.state.focused ? -1 : 3}}
                      onClick={(event)=> {
-                         console.log(event.shiftKey, this.state.editorFocused);
                          if(event.shiftKey) {
                              console.log('shifting');
                              this.focusSink.focus();
@@ -146,6 +148,8 @@ function selector(dispatch) {
     let result = {};
     const actions = bindActionCreators(Actions, dispatch);
     return (nextState, nextOwnProps) => {
+
+        nextState = nextState.undoable.present;
 
         const nextResult = {
             actions: actions,

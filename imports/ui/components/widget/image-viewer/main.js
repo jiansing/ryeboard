@@ -21,6 +21,7 @@ const ImageTarget = {
         }
         if(item.urls){
             let data  = item.urls[0];
+            if(!/\.(jpg|gif|png)$/.test(data)) return;
             component.setImage(data);
         }
     },
@@ -48,6 +49,7 @@ class PureImageViewer extends Component{
     setImage(image){
         let id = this.props.id;
         this.props.actions.modifyBoard({id, data: {image: image}});
+        this.props.actions.setMutable();
     }
 
     sizeToGrid(size){
@@ -77,21 +79,24 @@ class PureImageViewer extends Component{
             maxWidth = this.props.maxWidth,
             maxHeight = this.props.maxHeight;
 
-        let ratio, newWidth, newHeight;
+        let ratio, newWidth, newHeight, minSize;
 
         if(this.image.naturalWidth < this.image.naturalHeight){
             ratio = this.image.naturalHeight / this.image.naturalWidth;
-            newWidth = 90;
-            newHeight = ratio * 90;
+            newWidth = currentWidth;
+            newHeight = ratio * currentWidth;
+            minSize = [90, ratio * 90]
         }
         else{
             ratio = this.image.naturalWidth / this.image.naturalHeight;
-            newWidth = ratio * 90;
-            newHeight = 90;
+            newWidth = ratio * currentHeight;
+            newHeight = currentHeight;
+            minSize = [ratio * 90, 90]
         }
 
         this.props.actions.modifyBoard({id,  width: newWidth, height: newHeight, maxSize: [Infinity, Infinity],
-            minSize: [newWidth, newHeight], data: {ratio: true} });
+            minSize: minSize, data: {ratio: true} });
+        this.props.actions.setMutable();
     }
 
     unlockAspectRatio(){
@@ -99,6 +104,7 @@ class PureImageViewer extends Component{
         this.setState({ratio: false});
         this.props.actions.modifyBoard({id,  maxSize: [Infinity, Infinity],
             minSize: [90, 90], data: {ratio: false}  });
+        this.props.actions.setMutable();
     }
 
     compileMenu(context){
@@ -117,6 +123,7 @@ class PureImageViewer extends Component{
         switch(key){
             case 8 : {
                 this.props.actions.removeFromBoard(this.props.id);
+                this.props.actions.setMutable();
             }
         }
     }
@@ -178,6 +185,8 @@ function selector(dispatch) {
     let result = {};
     const actions = bindActionCreators(Actions, dispatch);
     return (nextState, nextOwnProps) => {
+
+        nextState = nextState.undoable.present;
 
         const nextResult = {
             actions: actions,

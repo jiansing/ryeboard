@@ -71,3 +71,12 @@ export const modifySettingsParam = (value) => {
     }
 };
 
+export const setMutable = () => {
+
+    console.log('setting mutable')
+
+    return {
+        type: 'MUTABLE'
+    }
+};
+

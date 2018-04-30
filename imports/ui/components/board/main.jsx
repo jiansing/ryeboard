@@ -31,7 +31,7 @@ const widgetTarget = {
                     document.getElementById('board-container').scrollLeft || 0;
 
             let data  = URL.createObjectURL(monitor.getItem().files[0]);
-            component.addImageWidget({data: {image: data}, left: x + left - 75, top: y + top - 50, height: 150, width: 150, type: 'image'});
+            component.addWidget({data: {image: data}, left: x + left - 75, top: y + top - 50, height: 150, width: 150, type: 'image'});
             return;
         }
         if(item.urls){
@@ -44,7 +44,8 @@ const widgetTarget = {
                     document.getElementById('board-container').scrollLeft || 0;
 
             let data  = item.urls[0];
-            component.addImageWidget({data: {image: data}, left: x + left - 75, top: y + top - 50, height: 150, width: 150, type: 'image'});
+            if(!/\.(jpg|gif|png)$/.test(data)) return;
+            component.addWidget({data: {image: data}, left: x + left - 75, top: y + top - 50, height: 150, width: 150, type: 'image'});
             return;
         }
 
@@ -110,22 +111,21 @@ class PureBoard extends Component {
         this.props.actions.selectWidgetFromBoard(id, data);
     }
 
-    addImageWidget(data){
-        this.props.actions.addToBoard({...data});
-    }
-
     addWidget(data) {
         this.props.actions.addToBoard({...data});
+        this.props.actions.setMutable();
     }
 
     moveWidget(id, left, top) {
         this.props.actions.modifyBoard({id, left, top});
+        this.props.actions.setMutable();
     }
 
     resizeWidget(id, height, width) {
         if(!id && !height && !width) this.setState({resizing: true});
         else{
             this.props.actions.modifyBoard({id, height, width});
+            this.props.actions.setMutable();
             this.setState({resizing: false});
         }
     }
@@ -160,6 +160,8 @@ function selector(dispatch) {
     let result = {};
     const actions = bindActionCreators(Actions, dispatch);
     return (nextState, nextOwnProps) => {
+
+        nextState = nextState.undoable.present;
 
         const nextResult = {
             actions: actions,

@@ -66,6 +66,9 @@ function selector(dispatch) {
     let result = {};
     const actions = bindActionCreators(Actions, dispatch);
     return (nextState, nextOwnProps) => {
+
+        nextState = nextState.undoable.present;
+
         const nextResult = {
             currentMenu: nextState.boardLogic.selected && nextState.boardLogic.selected.data && document.body !== document.activeElement ?
                 nextState.boardLogic.selected.data : null,
