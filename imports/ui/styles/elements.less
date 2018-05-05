@@ -79,13 +79,12 @@
     }
   }
 
-  .transition{
-    transition: all .25s ease-in-out;
-    background: transparent;
+  .draggable-widgets{
+    transition: all ease-in-out .25s;
   }
 
-  .flex-filler {
-    flex: 5;
+  .draggable-widgets:hover{
+    transform: scale(1.1, 1.1) translate(5px, 0);
   }
 
   hr {
@@ -93,13 +92,5 @@
     margin-right: 25px;
     color: lightgray;
     //border: solid gray 5px;
-  }
-
-  .marginTop-huge {
-    margin-top: 20vh;
-  }
-
-  .flexWrap {
-    flex-wrap: wrap;
   }
 }

@@ -18,7 +18,7 @@ class PureMenu extends Component {
     renderPreviews(){
         return previews.map(function(Elem){
             return (
-                <div key={Math.random()} style={{padding: '5px', width: '100%'}}>
+                <div className='draggable-widgets' key={Math.random()} style={{padding: '5px', width: '100%'}}>
                     <Elem />
                 </div>
             )
@@ -31,7 +31,7 @@ class PureMenu extends Component {
         return this.props.currentMenu.map(function(elem){
             if(!elem.condition(self.props.currentContext.data)) return '';
             return (
-                <div style={{textAlign: 'center', width: '100%', padding: '5px'}}
+                <div className='draggable-widgets' style={{textAlign: 'center', width: '100%', padding: '5px'}}
                      key={elem.title(self.props.currentContext.data)}
                      onClick={()=>{
                          elem.fun(self.props.currentContext.data);
