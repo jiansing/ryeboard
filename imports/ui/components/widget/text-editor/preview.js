@@ -13,7 +13,7 @@ export default class Preview extends Component{
 
     render(){
         return(
-            <PreviewCore height={150} width={300} type={'note'} data={{editorState: EditorState.createEmpty()}}/>
+            <PreviewCore height={150} width={300} type={'note'}/>
         )
     }
 }

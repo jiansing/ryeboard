@@ -9,6 +9,8 @@ import update from 'updeep';
 import Widget from '../widget/main';
 import DragLayer from './dragLayer';
 import { NativeTypes } from 'react-dnd-html5-backend';
+import isUrlImage from '/imports/helper/isUrlImage';
+import store from '/imports/redux/store';
 
 const widgetTarget = {
     drop(props, monitor, component) {
@@ -30,8 +32,15 @@ const widgetTarget = {
                     document.getElementById('board-container').scrollLeft ||
                     document.getElementById('board-container').scrollLeft || 0;
 
-            let data  = URL.createObjectURL(monitor.getItem().files[0]);
-            component.addWidget({data: {image: data}, left: x + left - 75, top: y + top - 50, height: 150, width: 150, type: 'image'});
+            let uploader = new Slingshot.Upload("userImageUploads");
+            uploader.send(monitor.getItem().files[0], function (error, downloadUrl) {
+                if (error) {
+                    alert (error);
+                }
+                else {
+                    component.addWidget({data: {image: downloadUrl}, left: x + left - 75, top: y + top - 50, height: 150, width: 150, type: 'image'});
+                }
+            });
             return;
         }
         if(item.urls){
@@ -44,8 +53,9 @@ const widgetTarget = {
                     document.getElementById('board-container').scrollLeft || 0;
 
             let data  = item.urls[0];
-            if(!/\.(jpg|gif|png)$/.test(data)) return;
-            component.addWidget({data: {image: data}, left: x + left - 75, top: y + top - 50, height: 150, width: 150, type: 'image'});
+
+            isUrlImage(data, ()=> component.addWidget({data: {image: data}, left: x + left - 75, top: y + top - 50, height: 150, width: 150, type: 'image'}), 10000);
+
             return;
         }
 
@@ -114,18 +124,20 @@ class PureBoard extends Component {
     addWidget(data) {
         this.props.actions.addToBoard({...data});
         this.props.actions.setMutable();
+        Meteor.call('boards.update', store.getState());
     }
 
     moveWidget(id, left, top) {
         this.props.actions.modifyBoard({id, left, top});
         this.props.actions.setMutable();
+        Meteor.call('boards.update', store.getState());
     }
 
     resizeWidget(id, height, width) {
         if(!id && !height && !width) this.setState({resizing: true});
         else{
             this.props.actions.modifyBoard({id, height, width});
-            this.props.actions.setMutable();
+            Meteor.call('boards.update', store.getState());
             this.setState({resizing: false});
         }
     }

@@ -8,26 +8,46 @@ import {connectAdvanced} from "react-redux";
 import equals from 'fast-deep-equal';
 import {bindActionCreators} from 'redux';
 import * as Actions from "/imports/redux/actions/main";
-import {Editor, EditorState, RichUtils} from 'draft-js';
+import {Editor, EditorState, RichUtils, convertFromRaw, convertToRaw} from 'draft-js';
+import store from '/imports/redux/store';
 import 'draft-js/dist/Draft.css'
 
 class PureTextEditor extends Component{
+
     constructor(props) {
         super(props);
-        this.state = {focused: false};
+
+        let saved = props.savedEditorState;
+        console.log(saved);
+        this.state = {
+            focused: false,
+            editorState: saved ? saved : EditorState.createEmpty()
+        };
+
         this.handleKeyCommand = this.handleKeyCommand.bind(this);
     }
 
-    componentDidMount(){
-        if(this.props.editorState === null){
+    componentWillMount(){
+        console.log('mounting...', this.state.editorState);
+        if(this.state.editorState === null){
             let id = this.props.id;
-            this.props.actions.modifyBoard({id, data: {editorState: EditorState.createEmpty()}})
         }
+    }
+
+    makeMutable(){
+        let content = this.state.editorState.getCurrentContent();
+        let raw = convertToRaw(content);
+        let id = this.props.id;
+        console.log('saving as:', raw);
+        this.props.actions.modifyBoard({id, data: {editorState: raw}});
+        this.props.actions.setMutable();
+        Meteor.call('boards.update', store.getState());
     }
 
     handleEdit(editorState){
         let id = this.props.id;
-        this.props.actions.modifyBoard({id, data: {editorState: editorState}})
+        this.setState({editorState: editorState});
+        //this.props.actions.modifyBoard({id, data: {editorState: editorState}})
     }
 
     handleKeyCommand(command, editorState) {
@@ -40,25 +60,19 @@ class PureTextEditor extends Component{
     }
 
     onBoldClick() {
-        const newState = RichUtils.toggleInlineStyle(this.props.editorState, 'BOLD');
+        const newState = RichUtils.toggleInlineStyle(this.state.editorState, 'BOLD');
         if(newState)  this.handleEdit(newState);
     }
 
     onItalicClick() {
-        const newState = RichUtils.toggleInlineStyle(this.props.editorState, 'ITALIC');
+        const newState = RichUtils.toggleInlineStyle(this.state.editorState, 'ITALIC');
         if(newState)  this.handleEdit(newState);
     }
 
     onUnderlineClick() {
-        const newState = RichUtils.toggleInlineStyle(this.props.editorState, 'UNDERLINE');
+        const newState = RichUtils.toggleInlineStyle(this.state.editorState, 'UNDERLINE');
         if(newState)  this.handleEdit(newState);
     }
-
-    onCodeClick() {
-        const newState = RichUtils.toggleInlineStyle(this.props.editorState, 'CODE');
-        if(newState)  this.handleEdit(newState);
-    }
-
 
     compileMenu(){
         let bold = {
@@ -91,6 +105,7 @@ class PureTextEditor extends Component{
             case 8 : {
                 this.props.actions.removeFromBoard(this.props.id);
                 this.props.actions.setMutable();
+                Meteor.call('boards.update', store.getState());
             }
         }
 
@@ -103,11 +118,9 @@ class PureTextEditor extends Component{
                 <div style={{position: 'absolute', height: '100%', width: '100%', zIndex: this.state.focused ? -1 : 3}}
                      onClick={(event)=> {
                          if(event.shiftKey) {
-                             console.log('shifting');
                              this.focusSink.focus();
                          }
                          else {
-                             console.log('non-shifting');
                              this.editor.focus();
                          }
                      }}/>
@@ -123,10 +136,11 @@ class PureTextEditor extends Component{
                          this.props.handleSelect(this.props.id, this.compileMenu());
                          this.setState({focused: true});
                      }}>
-                    <Editor editorState={this.props.editorState}
+                    <Editor editorState={this.state.editorState}
                             onBlur={()=>{
                                 console.log("lost editor focus");
                                 this.props.actions.deselectWidgetFromBoard();
+                                this.makeMutable();
                                 this.setState({focused: false});
                             }}
                             onFocus={()=>{
@@ -153,11 +167,11 @@ function selector(dispatch) {
 
         const nextResult = {
             actions: actions,
-            editorState: function() {
-                if(nextOwnProps.data && nextOwnProps.data.editorState) return nextOwnProps.data.editorState;
+            savedEditorState: function() {
                 let editor = nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id);
                 if(editor && editor.data) {
-                    return editor.data.editorState;
+                    let state = EditorState.createWithContent(convertFromRaw(editor.data.editorState));
+                    return state;
                 }
                 else return null;
             }(),

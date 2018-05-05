@@ -18,7 +18,7 @@ const widgetSource = {
             height = props.height || 150;
 
         top += document.getElementById('preview-' + props.type).offsetTop;
-        left -= 60;
+        left -= 75;
 
         return { type, data, left, top, width, height, newWidget }
     },

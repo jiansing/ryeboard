@@ -31,10 +31,12 @@ class PureMenu extends Component {
         return this.props.currentMenu.map(function(elem){
             if(!elem.condition(self.props.currentContext.data)) return '';
             return (
-                <div style={{textAlign: 'center', width: '100%', padding: '5px'}} key={elem.title(self.props.currentContext.data)}>
-                    <img src={'/ph.svg'} height={25} width={25} onClick={()=>{
-                        elem.fun(self.props.currentContext.data);
-                    }}/>
+                <div style={{textAlign: 'center', width: '100%', padding: '5px'}}
+                     key={elem.title(self.props.currentContext.data)}
+                     onClick={()=>{
+                         elem.fun(self.props.currentContext.data);
+                     }}>
+                    <img src={'/ph.svg'} height={25} width={25} />
                     <p style={{margin: '0'}}>{elem.title(self.props.currentContext.data)}</p>
                 </div>
             )

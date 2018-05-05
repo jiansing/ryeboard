@@ -12,12 +12,11 @@ export default combineReducers({
     undoable: undoable(combineReducers({
         boardLayout,
         boardLogic,
-        settings
     }), {
         limit: 15,
         filter: function filterActions(action, currentState, previousHistory) {
-            console.log(action.type, 'MUTABLE');
-            return action.type === 'MUTABLE';
+            return action.type === 'SET_MUTABLE';
         }
-    })
+    }),
+    settings
 })

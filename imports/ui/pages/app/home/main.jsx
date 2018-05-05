@@ -7,11 +7,17 @@ import equals from 'fast-deep-equal';
 import * as Actions from "/imports/redux/actions/main";
 import { ActionCreators } from 'redux-undo';
 import {bindActionCreators} from 'redux';
+import { withTracker } from 'meteor/react-meteor-data';
 
 import Menu from '/imports/ui/components/menu/main';
 import NavBar from '/imports/ui/components/navbar/main';
 
 class PureHome extends React.Component{
+
+    constructor(props){
+        super(props);
+        this.state = {didMount: false};
+    }
 
     componentDidMount() {
         let self = this;
@@ -21,23 +27,44 @@ class PureHome extends React.Component{
 
                 if(event.metaKey && event.keyCode === 90){
                     if(event.shiftKey){
-                        console.log('redoing');
                         self.props.actions.redo();
+                        event.preventDefault();
+                        event.stopPropagation();
                     }
                     else{
-                        console.log('undoing');
                         self.props.actions.undo();
+                        event.preventDefault();
+                        event.stopPropagation();
                     }
                 }
             }
         }, true)
+        this.setState({didMount: true});
+    }
+
+    setData(){
+        if(this.props.currentUser){
+            console.log("using user data");
+            Meteor.call('boards.find', (error, result) => {
+                if(error || typeof result === 'undefined') return '';
+                let state = result.state;
+                console.log('finished board call', state);
+                this.props.actions.setState(state);
+            });
+        }
+        else {
+            console.log("using default data");
+            this.props.actions.setState();
+        }
     }
 
     render(){
 
+        if(this.state.didMount) this.setData();
+
         return(
             <div>
-                <NavBar />
+                <NavBar history={this.props.history}/>
                 <Menu />
                 <Board />
             </div>
@@ -46,6 +73,12 @@ class PureHome extends React.Component{
 }
 
 let dndHome = DragDropContext(HTML5Backend)(PureHome);
+
+let trackedHome = withTracker(() => {
+    return {
+        currentUser: Meteor.user(),
+    };
+})(dndHome);
 
 function selector(dispatch) {
 
@@ -68,4 +101,4 @@ function selector(dispatch) {
     }
 }
 
-export default connectAdvanced(selector)(dndHome);
+export default connectAdvanced(selector)(trackedHome);

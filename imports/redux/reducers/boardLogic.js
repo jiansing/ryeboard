@@ -3,10 +3,10 @@
  */
 
 import * as types from '../constants/actionTypes';
-import deepChange from 'updeep';
 
 const DEFAULT_STATE = {
     selected: null,
+    title: null,
 };
 
 function selection(state = DEFAULT_STATE, action) {
@@ -29,8 +29,18 @@ function selection(state = DEFAULT_STATE, action) {
         case types.BOARD_REMOVE: {
             let newState = JSON.parse(JSON.stringify(state));
             if(action.value === state.selected.id) newState.selected = null;
-            else return state;
+            else {
+                return state;
+            }
             return newState;
+        }
+
+        case types.SET_STATE : {
+            if(action.value){
+                let newState = action.value.boardLogic;
+                return newState;
+            }
+            else return DEFAULT_STATE;
         }
 
         default:

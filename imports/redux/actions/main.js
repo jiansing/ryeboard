@@ -4,7 +4,7 @@
 
 import * as types from '../constants/actionTypes';
 
-//***** Profile Redux Actions *****//
+//***** Board Redux Actions *****//
 
 export const addToBoard = (object) => {
 
@@ -22,11 +22,12 @@ export const removeFromBoard = (path) => {
     }
 };
 
-export const modifyBoard = (value) => {
+export const modifyBoard = (value, preventSync) => {
 
     return {
         type: types.BOARD_MODIFY,
-        value: value
+        value: value,
+        preventSync: preventSync
     }
 };
 
@@ -73,10 +74,15 @@ export const modifySettingsParam = (value) => {
 
 export const setMutable = () => {
 
-    console.log('setting mutable')
-
     return {
-        type: 'MUTABLE'
+        type: 'SET_MUTABLE'
     }
 };
 
+export const setState = (state) => {
+
+    return {
+        type: 'SET_STATE',
+        value: state
+    }
+};

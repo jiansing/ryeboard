@@ -26,7 +26,16 @@ function selection(state = DEFAULT_STATE, action) {
         }
 
         case types.SETTINGS_MODIFY: {
-            return deepChange(action.value, state);
+            let newState = deepChange(action.value, state);
+            return newState;
+        }
+
+        case types.SET_STATE : {
+            if(action.value){
+                let newState = action.value.settings;
+                return newState;
+            }
+            else return DEFAULT_STATE;
         }
 
         default:

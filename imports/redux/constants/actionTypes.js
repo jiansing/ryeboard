@@ -14,4 +14,5 @@ export const SETTINGS_MODIFY = "SETTINGS_MODIFY";
 export const SETTINGS_ADD = "SETTINGS_ADD";
 export const SETTINGS_REMOVE = "SETTINGS_REMOVE";
 
-export const MUTABLE = "MUTABLE";
+export const SET_MUTABLE = "SET_MUTABLE";
+export const SET_STATE = "SET_STATE";

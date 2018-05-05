@@ -10,19 +10,28 @@ import {bindActionCreators} from 'redux';
 import * as Actions from "/imports/redux/actions/main";
 import { DropTarget, connectDropTarget } from 'react-dnd'
 import { NativeTypes } from 'react-dnd-html5-backend';
+import isUrlImage from '/imports/helper/isUrlImage';
+import store from '/imports/redux/store';
 
 const ImageTarget = {
     drop(props, monitor, component) {
 
         let item = monitor.getItem();
         if(item.files){
-            let data  = URL.createObjectURL(monitor.getItem().files[0]);
-            component.setImage(data);
+            let uploader = new Slingshot.Upload("userImageUploads");
+            uploader.send(monitor.getItem().files[0], function (error, downloadUrl) {
+                if (error) {
+                    alert (error);
+                }
+                else {
+                    component.setImage(downloadUrl);
+                }
+            });
+            return;
         }
         if(item.urls){
             let data  = item.urls[0];
-            if(!/\.(jpg|gif|png)$/.test(data)) return;
-            component.setImage(data);
+            isUrlImage(data, ()=>  component.setImage(data), 10000);
         }
     },
 };
@@ -50,6 +59,7 @@ class PureImageViewer extends Component{
         let id = this.props.id;
         this.props.actions.modifyBoard({id, data: {image: image}});
         this.props.actions.setMutable();
+        Meteor.call('boards.update', store.getState());
     }
 
     sizeToGrid(size){
@@ -97,6 +107,7 @@ class PureImageViewer extends Component{
         this.props.actions.modifyBoard({id,  width: newWidth, height: newHeight, maxSize: [Infinity, Infinity],
             minSize: minSize, data: {ratio: true} });
         this.props.actions.setMutable();
+        Meteor.call('boards.update', store.getState());
     }
 
     unlockAspectRatio(){
@@ -105,6 +116,7 @@ class PureImageViewer extends Component{
         this.props.actions.modifyBoard({id,  maxSize: [Infinity, Infinity],
             minSize: [90, 90], data: {ratio: false}  });
         this.props.actions.setMutable();
+        Meteor.call('boards.update', store.getState());
     }
 
     compileMenu(context){
@@ -124,6 +136,7 @@ class PureImageViewer extends Component{
             case 8 : {
                 this.props.actions.removeFromBoard(this.props.id);
                 this.props.actions.setMutable();
+                Meteor.call('boards.update', store.getState());
             }
         }
     }

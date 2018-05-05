@@ -43,6 +43,14 @@ function selection(state = DEFAULT_STATE, action) {
             return newState;
         }
 
+        case types.SET_STATE : {
+            if(action.value){
+                let newState = action.value.boardLayout;
+                return newState;
+            }
+            else return DEFAULT_STATE;
+        }
+
         default:
             return state;
     }
