@@ -39,10 +39,26 @@ export const selectWidgetFromBoard = (id, data) => {
     }
 };
 
-export const deselectWidgetFromBoard = () => {
+export const multiSelectWidgetFromBoard = (id, data) => {
+
+    return {
+        type: types.BOARD_MULTI_SELECT_WIDGET,
+        value: {id, data}
+    }
+};
+
+export const deselectWidgetFromBoard = (id) => {
 
     return {
         type: types.BOARD_DESELECT_WIDGET,
+        value: id
+    }
+};
+
+export const deselectAllWidgetFromBoard = () => {
+
+    return {
+        type: types.BOARD_DESELECT_ALL_WIDGET,
     }
 };
 
@@ -73,7 +89,7 @@ export const modifySettingsParam = (value) => {
 };
 
 export const setMutable = () => {
-
+    console.log('making mutable...');
     return {
         type: 'SET_MUTABLE'
     }

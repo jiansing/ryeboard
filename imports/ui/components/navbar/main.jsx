@@ -10,7 +10,6 @@ class PureNavBar extends Component {
 
     constructor(props){
         super(props);
-        console.log(this.props.title);
     }
 
     login(){
@@ -37,8 +36,6 @@ class PureNavBar extends Component {
 
     render() {
 
-        console.log('setting as title:', this.props.title);
-
         return (
             <div style={{background: '#FFFFFF', height: '50px', display: 'flex', position: 'fixed',
                 top: 0, left: 0, width: '100%', zIndex: 5, boxShadow: '0 1px 1px 0 rgba(0, 0, 0, 0.15), 0 0px 1px 0 rgba(0, 0, 0, 0.15)'}}>
@@ -51,11 +48,12 @@ class PureNavBar extends Component {
                            placeholder={'your title'} tabIndex={-1}/>
                 </div>
                 <div style={{flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', paddingRight: '1rem'}}>
-                    <button className={'btn-empty'} onClick={()=> this.test()}>
+                    {/*<button className={'btn-empty'} onClick={()=> this.test()}>
                         <img src={'/ph.svg'} height={25} width={25} style={{margin: '.5rem'}}/>
-                    </button>
-                    <button className={'btn-empty'} onClick={()=> Meteor.userId() ? this.logout() : this.login()}>
-                        <img src={'/ph.svg'} height={25} width={25} style={{margin: '.5rem', opacity: Meteor.userId() ? 1 : .5}}/>
+                    </button>*/}
+                    <button className={Meteor.userId() ? 'btn-empty' : 'btn-default'} onClick={()=> Meteor.userId() ? this.logout() : this.login()}>
+                        {/*<img src={'/ph.svg'} height={25} width={25} style={{margin: '.5rem', opacity: Meteor.userId() ? 1 : .5}}/>*/}
+                        {Meteor.userId() ? 'Logout' : 'Login'}
                     </button>
                 </div>
             </div>
@@ -79,8 +77,6 @@ function selector(dispatch) {
             actions: actions,
             ...nextOwnProps
         };
-
-        console.log(nextState);
 
         if(!equals(nextResult, result)){
             result = nextResult;

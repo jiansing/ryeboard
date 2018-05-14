@@ -2,12 +2,12 @@ import React, {Component} from 'react';
 import { DragSource } from 'react-dnd'
 import { getEmptyImage } from 'react-dnd-html5-backend'
 import { ResizableBox } from 'react-resizable';
+import store from '/imports/redux/store';
 
 const widgetSource = {
 
     beginDrag(props) {
         const { id, type, left, top, width, height } = props;
-        props.handleSelect(id);
         document.activeElement.blur();
         return { id, type, left, top, width, height }
     }
@@ -47,7 +47,6 @@ class Widget extends Component {
 
     constructor(props){
         super(props);
-        this.state = {focused: false}
     }
 
     componentDidMount() {
@@ -57,7 +56,6 @@ class Widget extends Component {
     }
 
     preventDndOnResize(event){
-        this.props.handleSelect(this.props.id);
         document.activeElement.blur();
         event.stopPropagation();
         event.preventDefault();
@@ -76,9 +74,31 @@ class Widget extends Component {
         if(heightOffset > 7)  height += 15 - heightOffset;
         else height -= heightOffset;
 
-        console.log("SAVING AS:", width, height);
-
         this.props.handleResize(this.props.id, height, width);
+    }
+
+    handleKey(event){
+        let key = event.keyCode;
+        console.log('key on resizable:', this.props.focused);
+        if(!this.props.focused)
+            switch(key){
+                case 8 : {
+                    this.props.actions.removeFromBoard();
+                    this.props.actions.setMutable();
+                    Meteor.call('boards.update', store.getState());
+                }
+            }
+
+        event.stopPropagation();
+    }
+
+    select(event){
+        if(event.shiftKey) {
+            this.props.handleMultiSelect(this.props.id, {menu: this.props.menu()});
+        }
+        else {
+            this.props.handleSelect(this.props.id, {menu: this.props.menu()});
+        }
     }
 
     render() {
@@ -90,6 +110,8 @@ class Widget extends Component {
                 <div>
                     <ResizableBox width={this.props.width || 300} height={this.props.height || 150}
                                   minConstraints={this.props.minSize || [90, 90]}
+                                  onClickCapture={(event)=> this.select(event)}
+                                  onKeyDownCapture={(event)=> this.handleKey(event)}
                                   maxConstraints={this.props.maxSize || [Infinity, Infinity]}
                                   onResizeStart={(event)=>this.preventDndOnResize(event)}
                                   onResizeStop={(event, data)=>this.saveResize(event, data)}

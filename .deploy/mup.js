@@ -4,7 +4,7 @@ module.exports = {
             // TODO: set host address, username, and authentication method
             host: '13.125.234.99',
             username: 'ubuntu',
-            pem: "../../ryestory.pem"
+            pem: "../../ryeboard.pem"
             // password: 'server-password'
             // or neither for authenticate from ssh-agent
         }

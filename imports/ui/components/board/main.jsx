@@ -61,8 +61,8 @@ const widgetTarget = {
 
         const delta = monitor.getDifferenceFromInitialOffset();
 
-        let left = Math.round(item.left + delta.x);
-        let top = Math.round(item.top + delta.y);
+        let left = item.left + delta.x;
+        let top = item.top + delta.y;
 
         [left, top] = snapToGrid(left, top);
 
@@ -118,7 +118,17 @@ class PureBoard extends Component {
     }
 
     selectWidget(id, data) {
+        console.log('selecting widget:', id, data);
         this.props.actions.selectWidgetFromBoard(id, data);
+    }
+
+    multiSelectWidget(id, data) {
+        let selection = this.props.selectedWidgets;
+        if(Array.isArray(selection) && selection.findIndex((elem)=>elem.id === id)!==-1){
+            this.props.actions.deselectWidgetFromBoard(id, data);
+        }
+        else this.props.actions.multiSelectWidgetFromBoard(id, data);
+        Meteor.call('boards.update', store.getState());
     }
 
     addWidget(data) {
@@ -142,8 +152,16 @@ class PureBoard extends Component {
         }
     }
 
+    deselectAllWidgets(event){
+        if(!event.shiftKey){
+            this.props.actions.deselectAllWidgetFromBoard();
+        }
+    }
+
+
     renderWidget(item) {
         return <Widget key={item.id} id={item.id} {...item}
+                       handleMultiSelect={(id, data)=>this.multiSelectWidget(id, data)}
                        handleSelect={(id, data)=>this.selectWidget(id, data)}
                        handleResize={(id, height, width)=>this.resizeWidget(id, height, width)}/>
     }
@@ -155,6 +173,7 @@ class PureBoard extends Component {
 
         return connectDropTarget(
             <div id='board-container'
+                 onClickCapture={(event)=> this.deselectAllWidgets(event)}
                  style={{marginTop: '50px', marginLeft: '75px', width: 'calc(100vw - 75px)', height: 'calc(100vh - 50px)', overflow: 'scroll'}}>
                 <DragLayer />
                 <div  id='board' ref={(container) => this.container= container}>
@@ -177,6 +196,7 @@ function selector(dispatch) {
 
         const nextResult = {
             actions: actions,
+            selectedWidgets: nextState.boardLogic.selected,
             widgets: nextState.boardLayout
         };
 

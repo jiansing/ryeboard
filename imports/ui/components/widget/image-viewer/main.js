@@ -122,23 +122,11 @@ class PureImageViewer extends Component{
     compileMenu(context){
         let ratio = {
             condition: (data)=> typeof data !== 'undefined' && typeof data.image !== 'undefined' && data.image,
-            icon: null,
+            icon: '/icons/ratio.svg',
             title: (data) => {if(data) return data.ratio ? 'unset ratio' : 'set ratio'},
             fun: (data)=> {if(data)  return data.ratio ? this.unlockAspectRatio() : this.lockAspectRatio()}
         };
         return [ratio];
-    }
-
-    handleKey(event){
-        let key = event.keyCode;
-
-        switch(key){
-            case 8 : {
-                this.props.actions.removeFromBoard(this.props.id);
-                this.props.actions.setMutable();
-                Meteor.call('boards.update', store.getState());
-            }
-        }
     }
 
     render(){
@@ -146,46 +134,27 @@ class PureImageViewer extends Component{
         const { connectDropTarget } = this.props;
 
         return (
-            <Core selected={this.state.focused}
+            <Core selected={this.props.selected}
+                  focused={this.state.focused}
+                  menu={this.compileMenu()}
                   resizeOpts={{lockAspectRatio: this.props.ratio}}
                   {...this.props}>
                 {connectDropTarget(
                     <div style={{height: '100%', width: '100%', background: 'white'}}
                          className={this.props.isOver ? 'dustbin open' : 'dustbin'}>
                         <div style={{position: 'absolute', height: '100%', width: '100%', zIndex: this.state.focused ? -1 : 3}}
-                             onClick={()=> {
-                                 this.preview.focus()
+                             onClick={(event)=> {
+                                 this.preview.focus();
+                                 event.stopPropagation();
                              }}/>
                         <div style={{width: '100%', height: '100%', outline: 'none'}}>
-                            {this.props.imageData ?
-                                <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center',
-                                    height: '100%', width: '100%', textAlign: 'center', outline: 'none'}}
-                                     tabIndex={-1} ref={(preview) => this.preview = preview}
-                                     onKeyUp={(event)=>this.handleKey(event)}
-                                     onBlur={()=>{
-                                         this.props.actions.deselectWidgetFromBoard();
-                                         this.setState({focused: false});
-                                     }}
-                                     onFocus={()=>{
-                                         this.props.handleSelect(this.props.id, this.compileMenu());
-                                         this.setState({focused: true});
-                                     }}>
+                            <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center',
+                                height: '100%', width: '100%', textAlign: 'center', outline: 'none'}}
+                                 ref={(preview) => this.preview = preview}>
+                                {this.props.imageData ?
                                     <img ref={(image) => this.image = image} src={this.props.imageData} style={{height: '100%', width: '100%', outline: 'none', pointerEvents: 'none'}}/>
-                                </div> :
-                                <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center',
-                                    height: '100%', width: '100%', textAlign: 'center', padding: '5px', outline: 'none'}}
-                                     tabIndex={-1} ref={(preview) => this.preview = preview}
-                                     onKeyUp={(event)=>this.handleKey(event)}
-                                     onBlur={()=>{
-                                         this.props.actions.deselectWidgetFromBoard();
-                                         this.setState({focused: false});
-                                     }}
-                                     onFocus={()=>{
-                                         this.props.handleSelect(this.props.id, this.compileMenu());
-                                         this.setState({focused: true});
-                                     }}>
-                                    <h4>Drag an Image here</h4>
-                                </div>}
+                                    : <h4>Drag an Image here</h4>}
+                            </div>
                         </div>
                     </div>
                 )}
@@ -203,7 +172,17 @@ function selector(dispatch) {
 
         const nextResult = {
             actions: actions,
-            selectedSelf: nextState.boardLogic.selected && nextState.boardLogic.selected.id === nextOwnProps.id,
+            selected: function(){
+                let selection = nextState.boardLogic.selected;
+
+                if(Array.isArray(selection)){
+                    return selection.findIndex((elem)=> elem.id === nextOwnProps.id) !== -1
+                }
+                else if(selection){
+                    return selection.id === nextOwnProps.id;
+                }
+                else return false;
+            }(),
             imageData: function() {
                 let viewer = nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id);
                 if(viewer && viewer.data) {

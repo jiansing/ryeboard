@@ -5,8 +5,7 @@
 import * as types from '../constants/actionTypes';
 
 const DEFAULT_STATE = {
-    selected: null,
-    title: null,
+    selected: null
 };
 
 function selection(state = DEFAULT_STATE, action) {
@@ -19,10 +18,42 @@ function selection(state = DEFAULT_STATE, action) {
             return newState;
         }
 
-        case types.BOARD_DESELECT_WIDGET: {
-            console.log('deselecting');
+        case types.BOARD_MULTI_SELECT_WIDGET: {
+            let newState = JSON.parse(JSON.stringify(state));
+
+            console.log(action.value);
+            if(Array.isArray(newState.selected)){
+                newState.selected.push(action.value);
+            }
+            else if(newState.selected){
+                newState.selected = [newState.selected];
+                newState.selected.push(action.value);
+            }
+            else{
+                newState.selected = [action.value];
+            }
+            console.log(newState);
+            return newState;
+        }
+
+        case types.BOARD_DESELECT_ALL_WIDGET: {
             let newState = JSON.parse(JSON.stringify(state));
             newState.selected = null;
+            return newState;
+        }
+
+        case types.BOARD_DESELECT_WIDGET: {
+            let newState = JSON.parse(JSON.stringify(state));
+            if(Array.isArray(newState.selected)){
+                let deselectedIndex = newState.selected.findIndex((element)=> element.id === action.value);
+                console.log(deselectedIndex);
+                newState.selected.splice(deselectedIndex, 1);
+                if(newState.selected.length === 0) newState.selected = null;
+            }
+            else{
+                newState.selected = null;
+            }
+            console.log(state, newState);
             return newState;
         }
 
@@ -33,14 +64,6 @@ function selection(state = DEFAULT_STATE, action) {
                 return state;
             }
             return newState;
-        }
-
-        case types.SET_STATE : {
-            if(action.value){
-                let newState = action.value.boardLogic;
-                return newState;
-            }
-            else return DEFAULT_STATE;
         }
 
         default:

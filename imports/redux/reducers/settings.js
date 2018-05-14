@@ -7,6 +7,7 @@ import deepChange from 'updeep';
 
 const DEFAULT_STATE = {
     loggedIn: false,
+    title: '',
 };
 
 function selection(state = DEFAULT_STATE, action) {

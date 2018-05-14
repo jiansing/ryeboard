@@ -6,11 +6,8 @@ export const Boards = new Mongo.Collection('boards');
 Meteor.methods({
     'boards.update'(state) {
 
-        console.log('state:', state);
-
         let parsedState = {
             boardLayout: state.undoable.present.boardLayout,
-            boardLogic: state.undoable.present.boardLogic,
             settings: state.settings
         }
 

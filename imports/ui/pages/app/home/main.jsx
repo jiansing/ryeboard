@@ -38,22 +38,19 @@ class PureHome extends React.Component{
                     }
                 }
             }
-        }, true)
+        }, true);
         this.setState({didMount: true});
     }
 
     setData(){
         if(this.props.currentUser){
-            console.log("using user data");
             Meteor.call('boards.find', (error, result) => {
                 if(error || typeof result === 'undefined') return '';
                 let state = result.state;
-                console.log('finished board call', state);
                 this.props.actions.setState(state);
             });
         }
         else {
-            console.log("using default data");
             this.props.actions.setState();
         }
     }
