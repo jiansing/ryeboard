@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {connectAdvanced} from "react-redux";
-import equals from 'fast-deep-equal';
+import equals from 'react-fast-compare';
 import {bindActionCreators} from 'redux';
 import * as Actions from "/imports/redux/actions/main";
 import {previews} from '../widget/main';
@@ -30,7 +30,7 @@ class PureMenu extends Component {
         let self = this;
         return this.props.currentMenu.map(function(elem){
             let selected = false;
-            if(!elem.condition(self.props.currentContext.data)) return '';
+            if(!elem.condition || !elem.condition(self.props.currentContext.data)) return '';
             if(elem.selected) {
                 selected = elem.selected(self.props.currentContext.data);
             }
@@ -74,22 +74,27 @@ function selector(dispatch) {
         nextState = nextState.undoable.present;
 
         const nextResult = {
-            currentMenu: function(){
+            selection: nextState.boardLogic.selected,
+            ...nextOwnProps,
+        };
+
+        if(!equals(nextResult, result)){
+
+            nextResult.currentMenu = function(){
                 if(Array.isArray(nextState.boardLogic.selected)) {
                     return null;
                 }
                 let menu = nextState.boardLogic.selected && nextState.boardLogic.selected.data ?
                     nextState.boardLogic.selected.data.menu : null;
                 return menu;
-            }(),
-            currentContext: nextState.boardLogic.selected ? function(){
+            }();
+
+            nextResult.currentContext = nextState.boardLogic.selected ? function(){
                 if(Array.isArray(nextState.boardLogic.selected)) return null;
                 let selectedWidget = nextState.boardLayout.findIndex((elem) => elem.id === nextState.boardLogic.selected.id);
                 return  nextState.boardLayout[selectedWidget];
-            }() : null,
-        };
+            }() : null;
 
-        if(!equals(nextResult, result)){
             result = nextResult;
         }
         return result

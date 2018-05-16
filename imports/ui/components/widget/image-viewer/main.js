@@ -5,7 +5,7 @@
 import React, {Component} from 'react';
 import Core from '../core';
 import {connectAdvanced} from "react-redux";
-import equals from 'fast-deep-equal';
+import equals from 'react-fast-compare';
 import {bindActionCreators} from 'redux';
 import * as Actions from "/imports/redux/actions/main";
 import { DropTarget, connectDropTarget } from 'react-dnd'
@@ -103,7 +103,6 @@ class PureImageViewer extends Component{
             newHeight = currentHeight;
             minSize = [ratio * 90, 90]
         }
-
         this.props.actions.modifyBoard({id,  width: newWidth, height: newHeight, maxSize: [Infinity, Infinity],
             minSize: minSize, data: {ratio: true} });
         this.props.actions.setMutable();
@@ -136,7 +135,7 @@ class PureImageViewer extends Component{
         return (
             <Core selected={this.props.selected}
                   focused={this.state.focused}
-                  menu={this.compileMenu()}
+                  menu={this.props.preview ? null : ()=>this.compileMenu()}
                   resizeOpts={{lockAspectRatio: this.props.ratio}}
                   {...this.props}>
                 {connectDropTarget(

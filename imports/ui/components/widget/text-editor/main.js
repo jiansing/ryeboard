@@ -5,7 +5,7 @@
 import React, {Component} from 'react';
 import Core from '../core';
 import {connectAdvanced} from "react-redux";
-import equals from 'fast-deep-equal';
+import equals from 'react-fast-compare';
 import {bindActionCreators} from 'redux';
 import * as Actions from "/imports/redux/actions/main";
 import {Editor, EditorState, RichUtils, convertFromRaw, convertToRaw} from 'draft-js';
@@ -17,7 +17,7 @@ class PureTextEditor extends Component{
     constructor(props) {
         super(props);
 
-        let saved = props.savedEditorState;
+        let saved = props.savedEditorState ? EditorState.createWithContent(convertFromRaw(props.savedEditorState)) : null;
         this.state = {
             focused: false,
             editorState: saved ? saved : EditorState.createEmpty()
@@ -26,10 +26,11 @@ class PureTextEditor extends Component{
         this.handleKeyCommand = this.handleKeyCommand.bind(this);
     }
 
-    componentWillMount(){
-        if(this.state.editorState === null){
-            let id = this.props.id;
-        }
+    static getDerivedStateFromProps(nextProps, prevState){
+        if(nextProps.savedEditorState && nextProps.shouldUpdate)
+        prevState.editorState = EditorState.createWithContent(convertFromRaw(nextProps.savedEditorState));
+
+        return prevState;
     }
 
     makeMutable(){
@@ -99,17 +100,27 @@ class PureTextEditor extends Component{
 
     render(){
         return(
-            <Core selected={this.props.selected} {...this.props}
+            <Core selected={this.props.selected}
                   focused={this.state.focused}
-                  menu={()=>this.compileMenu()}>
+                  menu={this.props.preview ? null : ()=>this.compileMenu()}
+                  {...this.props}>
                 <div style={{position: 'absolute', height: '100%', width: '100%', zIndex: this.state.focused ? -1 : 3}}
                      onClick={(event)=> {
                          if(!event.shiftKey) {
                              this.editor.focus();
                              event.stopPropagation();
                          }
+                         else{
+                             this.editor.blur();
+                         }
                      }}/>
                 <div style={{height: '100%', width: '100%', overflowY: 'auto', padding: '15px', outline: 'none'}} tabIndex={-1}
+                     onBlur={()=>{
+                         this.setState({focused: false});
+                     }}
+                     onFocus={()=>{
+                         this.setState({focused: true});
+                     }}
                      ref={(focusSink)=>this.focusSink = focusSink}>
                     <Editor editorState={this.state.editorState}
                             onBlur={()=>{
@@ -138,30 +149,30 @@ function selector(dispatch) {
 
         const nextResult = {
             actions: actions,
-            selected: function(){
-                let selection = nextState.boardLogic.selected;
-                if(Array.isArray(selection)){
-                    return selection.findIndex((elem)=> elem.id === nextOwnProps.id) !== -1
-                }
-                else if(selection){
-                    return selection.id === nextOwnProps.id;
-                }
-                else return false;
-            }(),
+            selected: nextState.boardLogic.selected,
             savedEditorState: function() {
-                return null;
                 let editor = nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id);
                 if(editor && editor.data) {
-                    console.log('converting from saved');
-                    let state = EditorState.createWithContent(convertFromRaw(editor.data.editorState));
-                    return state;
+                    return editor.data.editorState;
                 }
                 else return null;
             }(),
             ...nextOwnProps
         };
 
+        nextResult.shouldUpdate = !equals(nextResult.savedEditorState, result.savedEditorState);
+
         if(!equals(nextResult, result)){
+            if(nextResult.selected) {
+                let selection = nextResult.selected;
+                if(Array.isArray(selection)){
+                    nextResult.selected = selection.findIndex((elem)=> elem.id === nextOwnProps.id) !== -1
+                }
+                else if(selection){
+                    nextResult.selected = selection.id === nextOwnProps.id;
+                }
+                else nextResult.selected = false;
+            }
             result = nextResult;
         }
         return result

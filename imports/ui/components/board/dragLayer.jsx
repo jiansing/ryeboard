@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { DragLayer } from 'react-dnd'
-import snapToGrid from '/imports/helper/snapToGrid'
 import Widget from '../widget/main';
 
 const layerStyles = {
@@ -30,17 +29,19 @@ function getItemStyles(props) {
     }
 }
 
-class CustomDragLayer extends Component {
+class PureDragLayer extends Component {
 
+    componentDidMount(){
+        console.log('mounted drag layer');
+    }
 
-    renderItem(type, item) {
+    renderItem(type, item, offsetTop, offsetLeft) {
+
         switch (type) {
             case 'widget':
-                return  <Widget key={item.key} id={item.id} type={item.type}
-                                preview data={item.data}
-                                width={item.width} height={item.height}/>;
+                return  <Widget key={item.id} offsetTop={offsetTop} offsetLeft={offsetLeft} preview {...item}/>;
             case 'widgetPreview':
-                return  <Widget key={item.key} id={item.id} type={item.type}
+                return  <Widget key={item.id} id={item.id} type={item.type}
                                 preview data={item.data}
                                 width={item.width} height={item.height}/>;
             default:
@@ -54,10 +55,16 @@ class CustomDragLayer extends Component {
         if (!isDragging) {
             return null
         }
+
+        let widgets = Array.isArray(item.selectedWidgets) ?
+            item.selectedWidgets.map((elem, index)=> this.renderItem(itemType, elem, item.offsetTop, item.offsetLeft)) :
+            this.renderItem(itemType, item);
+
         return (
             <div style={layerStyles}>
                 <div style={getItemStyles(this.props)}>
-                    {this.renderItem(itemType, item)}
+                    {widgets}
+                    {/*this.renderItem(itemType, item)*/}
                 </div>
             </div>
         )
@@ -74,4 +81,4 @@ function collect(monitor) {
     };
 }
 
-export default DragLayer(collect)(CustomDragLayer);
+export default DragLayer(collect)(PureDragLayer);

@@ -5,7 +5,8 @@
 import * as types from '../constants/actionTypes';
 
 const DEFAULT_STATE = {
-    selected: null
+    selected: null,
+    dragging: null
 };
 
 function selection(state = DEFAULT_STATE, action) {
@@ -57,12 +58,22 @@ function selection(state = DEFAULT_STATE, action) {
             return newState;
         }
 
+        case types.BOARD_DRAG_WIDGET: {
+            let newState = JSON.parse(JSON.stringify(state));
+            newState.dragging = action.value;
+            console.log('dragging widget:', newState.dragging);
+            return newState;
+        }
+
+        case types.BOARD_MULTI_DRAG_WIDGET: {
+            let newState = JSON.parse(JSON.stringify(state));
+            newState.dragging = action.value;
+            return newState;
+        }
+
         case types.BOARD_REMOVE: {
             let newState = JSON.parse(JSON.stringify(state));
-            if(action.value === state.selected.id) newState.selected = null;
-            else {
-                return state;
-            }
+            newState.selected = null;
             return newState;
         }
 

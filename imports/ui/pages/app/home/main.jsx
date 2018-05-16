@@ -3,7 +3,7 @@ import Board from '/imports/ui/components/board/main';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { DragDropContext } from 'react-dnd';
 import {connectAdvanced} from "react-redux";
-import equals from 'fast-deep-equal';
+import equals from 'react-fast-compare';
 import * as Actions from "/imports/redux/actions/main";
 import { ActionCreators } from 'redux-undo';
 import {bindActionCreators} from 'redux';
@@ -22,23 +22,6 @@ class PureHome extends React.Component{
     componentDidMount() {
         let self = this;
         window.scrollTo(0,0);
-        window.addEventListener('keydown', function(event){
-            if(document.activeElement === document.body){
-
-                if(event.metaKey && event.keyCode === 90){
-                    if(event.shiftKey){
-                        self.props.actions.redo();
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                    else{
-                        self.props.actions.undo();
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                }
-            }
-        }, true);
         this.setState({didMount: true});
     }
 
@@ -48,10 +31,8 @@ class PureHome extends React.Component{
                 if(error || typeof result === 'undefined') return '';
                 let state = result.state;
                 this.props.actions.setState(state);
+                this.props.actions.setMutable();
             });
-        }
-        else {
-            this.props.actions.setState();
         }
     }
 
@@ -80,7 +61,7 @@ let trackedHome = withTracker(() => {
 function selector(dispatch) {
 
     let result = {};
-    const actions = bindActionCreators(Object.assign({}, Actions, ActionCreators), dispatch);
+    const actions = bindActionCreators(Actions, dispatch);
 
     return (nextState, props) => {
 

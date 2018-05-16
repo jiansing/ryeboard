@@ -2,14 +2,37 @@ import React, {Component} from 'react';
 import { DragSource } from 'react-dnd'
 import { getEmptyImage } from 'react-dnd-html5-backend'
 import { ResizableBox } from 'react-resizable';
+import {connectAdvanced} from "react-redux";
+import equals from 'react-fast-compare';
+import {bindActionCreators} from 'redux';
+import * as Actions from "/imports/redux/actions/main";
 import store from '/imports/redux/store';
 
 const widgetSource = {
 
+    canDrag(props) {
+        return !props.focused;
+    },
+
     beginDrag(props) {
-        const { id, type, left, top, width, height } = props;
+
+        let { id, type, left, top, width, height, selectedWidgets } = props;
         document.activeElement.blur();
-        return { id, type, left, top, width, height }
+        if(selectedWidgets === null) {
+            props.handleSelect(props.id, {menu: props.dragging ? null : props.menu()});
+            selectedWidgets = [{id, type, left, top, width, height}];
+        }
+        if(selectedWidgets.findIndex((elem)=>elem.id===id) === -1){
+            props.actions.deselectAllWidgetFromBoard();
+            selectedWidgets = [{id, type, left, top, width, height}];
+        }
+
+        props.actions.dragWidgetOnBoard(selectedWidgets);
+        return {selectedWidgets, offsetTop: top, offsetLeft: left}
+    },
+
+    endDrag(props){
+        props.actions.dragWidgetOnBoard(null);
     }
 };
 
@@ -24,15 +47,21 @@ function collect(connect, monitor) {
 
 function getStyles(props) {
 
-    const {left, top, isDragging, preview, selected} = props;
+    let {left, offsetLeft, top, offsetTop, isDragging, preview, selected, dragging} = props;
+
+    if(offsetLeft && offsetTop) {
+        left -= offsetLeft;
+        top -= offsetTop;
+    }
+
     const transform = `translate3d(${left}px, ${top}px, 0)`;
 
     return {
         position: 'absolute',
         transform,
         WebkitTransform: transform,
-        opacity: isDragging ? 0 : 1,
-        height: isDragging ? 0 : '',
+        opacity: isDragging || dragging ? 0 : 1,
+        height: isDragging  || dragging ? 0 : '',
         zIndex: 1,
         outline: selected ? '2px dodgerBlue solid' : '2px transparent solid',
         boxShadow: preview ?
@@ -43,7 +72,7 @@ function getStyles(props) {
 }
 
 
-class Widget extends Component {
+class PureWidget extends Component {
 
     constructor(props){
         super(props);
@@ -77,27 +106,12 @@ class Widget extends Component {
         this.props.handleResize(this.props.id, height, width);
     }
 
-    handleKey(event){
-        let key = event.keyCode;
-        console.log('key on resizable:', this.props.focused);
-        if(!this.props.focused)
-            switch(key){
-                case 8 : {
-                    this.props.actions.removeFromBoard();
-                    this.props.actions.setMutable();
-                    Meteor.call('boards.update', store.getState());
-                }
-            }
-
-        event.stopPropagation();
-    }
-
     select(event){
         if(event.shiftKey) {
-            this.props.handleMultiSelect(this.props.id, {menu: this.props.menu()});
+            this.props.handleMultiSelect(this.props.id, {menu: this.props.dragging ? null : this.props.menu()});
         }
         else {
-            this.props.handleSelect(this.props.id, {menu: this.props.menu()});
+            this.props.handleSelect(this.props.id, {menu: this.props.dragging ? null : this.props.menu()});
         }
     }
 
@@ -111,7 +125,6 @@ class Widget extends Component {
                     <ResizableBox width={this.props.width || 300} height={this.props.height || 150}
                                   minConstraints={this.props.minSize || [90, 90]}
                                   onClickCapture={(event)=> this.select(event)}
-                                  onKeyDownCapture={(event)=> this.handleKey(event)}
                                   maxConstraints={this.props.maxSize || [Infinity, Infinity]}
                                   onResizeStart={(event)=>this.preventDndOnResize(event)}
                                   onResizeStop={(event, data)=>this.saveResize(event, data)}
@@ -124,4 +137,47 @@ class Widget extends Component {
     }
 }
 
-export default DragSource('widget', widgetSource, collect)(Widget);
+let dndWidget = DragSource('widget', widgetSource, collect)(PureWidget);
+
+function selector(dispatch) {
+    let result = {};
+    const actions = bindActionCreators(Actions, dispatch);
+    return (nextState, nextOwnProps) => {
+
+        nextState = nextState.undoable.present;
+
+        const nextResult = {
+            dragging: nextState.boardLogic.dragging,
+            selectedWidgets: nextState.boardLogic.selected,
+            ...nextOwnProps
+        };
+
+        if(!equals(nextResult, result)){
+
+            if(nextResult.dragging) {
+                if(Array.isArray(nextResult.dragging)) {
+                    let pos = nextResult.dragging.findIndex((elem)=> elem.id === nextOwnProps.id);
+                    nextResult.dragging = pos!==-1 && !nextOwnProps.preview;
+                }
+                else {
+                    nextResult.dragging = nextResult.dragging === nextOwnProps.id && !nextOwnProps.preview;
+                }
+            }
+            if(nextResult.selectedWidgets){
+                if(Array.isArray(nextResult.selectedWidgets)){
+                    nextResult.selectedWidgets = nextResult.selectedWidgets.map(function(selected){
+                        return nextState.boardLayout.find((elem) => elem.id === selected.id);
+                    })
+                }
+                else{
+                    nextResult.selectedWidgets = [nextState.boardLayout.find((elem) => elem.id === nextResult.selectedWidgets.id)];
+                }
+            }
+
+            result = nextResult;
+        }
+        return result
+    }
+}
+
+export default connectAdvanced(selector)(dndWidget)

@@ -62,6 +62,22 @@ export const deselectAllWidgetFromBoard = () => {
     }
 };
 
+export const dragWidgetOnBoard = (id) => {
+
+    return {
+        type: types.BOARD_DRAG_WIDGET,
+        value: id
+    }
+};
+
+export const multiDragWidgetOnBoard = (id) => {
+
+    return {
+        type: types.BOARD_MULTI_DRAG_WIDGET,
+        value: id
+    }
+};
+
 //***** Settings Redux Actions *****//
 
 export const addSettingsParam = (object) => {

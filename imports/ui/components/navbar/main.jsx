@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {connectAdvanced} from "react-redux";
-import equals from 'fast-deep-equal';
+import equals from 'react-fast-compare';
 import {bindActionCreators} from 'redux';
 import * as Actions from "/imports/redux/actions/main";
 import { withTracker } from 'meteor/react-meteor-data';

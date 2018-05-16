@@ -19,9 +19,17 @@ function selection(state = DEFAULT_STATE, action) {
         }
 
         case types.BOARD_REMOVE: {
+            console.log("removing...", action.value);
             let newState = state.slice();
-            let pos = state.findIndex((elem) => elem.id === action.value);
-            newState.splice(pos, 1);
+            if(Array.isArray(action.value)){
+                action.value.forEach(function(selection){
+                    newState.splice(newState.findIndex((elem) => elem.id === selection), 1);
+                })
+            }
+            else{
+                let pos = newState.findIndex((elem) => elem.id === action.value);
+                newState.splice(pos, 1);
+            }
             return newState;
         }
 
