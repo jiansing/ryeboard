@@ -147,33 +147,33 @@ function selector(dispatch) {
         nextState = nextState.undoable.present;
 
         const nextResult = {
-            dragging: nextState.boardLogic.dragging,
-            selectedWidgets: nextState.boardLogic.selected,
-            ...nextOwnProps
-        };
-
-        if(!equals(nextResult, result)){
-
-            if(nextResult.dragging) {
-                if(Array.isArray(nextResult.dragging)) {
-                    let pos = nextResult.dragging.findIndex((elem)=> elem.id === nextOwnProps.id);
-                    nextResult.dragging = pos!==-1 && !nextOwnProps.preview;
+            dragging: function(){
+                let dragging = nextState.boardLogic.dragging;
+                if(!dragging) return null;
+                if(Array.isArray(dragging)) {
+                    let pos = dragging.findIndex((elem)=> elem.id === nextOwnProps.id);
+                    return pos!==-1 && !nextOwnProps.preview;
                 }
                 else {
-                    nextResult.dragging = nextResult.dragging === nextOwnProps.id && !nextOwnProps.preview;
+                    return dragging === nextOwnProps.id && !nextOwnProps.preview;
                 }
-            }
-            if(nextResult.selectedWidgets){
-                if(Array.isArray(nextResult.selectedWidgets)){
-                    nextResult.selectedWidgets = nextResult.selectedWidgets.map(function(selected){
+            }(),
+            selectedWidgets: function(){
+                let selected = nextState.boardLogic.selected;
+                if(!selected) return null;
+                if(Array.isArray(selected)){
+                    return selected.map(function(selected){
                         return nextState.boardLayout.find((elem) => elem.id === selected.id);
                     })
                 }
                 else{
-                    nextResult.selectedWidgets = [nextState.boardLayout.find((elem) => elem.id === nextResult.selectedWidgets.id)];
+                    return [nextState.boardLayout.find((elem) => elem.id === selected.id)];
                 }
-            }
+            }(),
+            ...nextOwnProps
+        };
 
+        if(!equals(nextResult, result)){
             result = nextResult;
         }
         return result

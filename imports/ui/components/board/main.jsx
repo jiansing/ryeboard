@@ -34,8 +34,6 @@ const widgetTarget = {
 
                 [left, top] = snapToGrid(left, top);
 
-                console.log(left, top);
-
                 widgetArray.push({id: selection.id, left, top});
             });
 
@@ -150,9 +148,12 @@ class PureBoard extends Component {
                         }
                         else selected = selected.id;
 
-                        self.props.actions.removeFromBoard(selected);
-                        self.props.actions.setMutable();
-                        Meteor.call('boards.update', store.getState());
+                        if(selected){
+                            self.props.actions.removeFromBoard(selected);
+                            self.props.actions.setMutable();
+                            Meteor.call('boards.update', store.getState());
+                        }
+
                         break;
                     }
                     case 90 : {
@@ -175,7 +176,6 @@ class PureBoard extends Component {
     }
 
     selectWidget(id, data) {
-        console.log('selecting widget:', id, data);
         this.props.actions.selectWidgetFromBoard(id, data);
     }
 

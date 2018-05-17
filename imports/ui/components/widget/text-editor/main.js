@@ -26,15 +26,22 @@ class PureTextEditor extends Component{
         this.handleKeyCommand = this.handleKeyCommand.bind(this);
     }
 
+    componentDidMount(){
+
+    }
+
     static getDerivedStateFromProps(nextProps, prevState){
-        if(nextProps.savedEditorState && nextProps.shouldUpdate)
-        prevState.editorState = EditorState.createWithContent(convertFromRaw(nextProps.savedEditorState));
+        if(prevState.editorState && nextProps.savedEditorState && nextProps.shouldUpdate){
+            //if(prevState.editorState) console.log('old state -', convertToRaw(prevState.editorState.getCurrentContent()));
+            let newEditorContent = convertFromRaw(nextProps.savedEditorState);
+            prevState.editorState = EditorState.createWithContent(newEditorContent);
+            //console.log('updating' +  nextProps.id +' with new props:', nextProps.savedEditorState);
+        }
 
         return prevState;
     }
 
     makeMutable(){
-        console.log('making text mutable');
         let content = this.state.editorState.getCurrentContent();
         let raw = convertToRaw(content);
         let id = this.props.id;
@@ -44,7 +51,6 @@ class PureTextEditor extends Component{
     }
 
     handleEdit(editorState){
-        console.log('handling edit');
         this.setState({editorState: editorState});
     }
 
@@ -99,6 +105,7 @@ class PureTextEditor extends Component{
     }
 
     render(){
+
         return(
             <Core selected={this.props.selected}
                   focused={this.state.focused}
@@ -106,29 +113,34 @@ class PureTextEditor extends Component{
                   {...this.props}>
                 <div style={{position: 'absolute', height: '100%', width: '100%', zIndex: this.state.focused ? -1 : 3}}
                      onClick={(event)=> {
-                         if(!event.shiftKey) {
-                             this.editor.focus();
-                             event.stopPropagation();
+                         if(event.shiftKey) {
+                             this.setState({focused: false});
+                             this.focusSink.focus();
                          }
                          else{
-                             this.editor.blur();
+                             this.setState({focused: true});
+                             this.editor.focus();
                          }
                      }}/>
                 <div style={{height: '100%', width: '100%', overflowY: 'auto', padding: '15px', outline: 'none'}} tabIndex={-1}
+                     ref={(focusSink)=>this.focusSink = focusSink}
+                     onClick={()=> this.editor.focus()}
                      onBlur={()=>{
                          this.setState({focused: false});
                      }}
                      onFocus={()=>{
                          this.setState({focused: true});
-                     }}
-                     ref={(focusSink)=>this.focusSink = focusSink}>
+                     }}>
                     <Editor editorState={this.state.editorState}
+                            readOnly={!this.state.focused}
                             onBlur={()=>{
+                                let editor = EditorState.set(this.state.editorState, {allowUndo: false});
+                                this.setState({focused: false, editorState: editor});
                                 this.makeMutable();
-                                this.setState({focused: false});
                             }}
                             onFocus={()=>{
-                                this.setState({focused: true});
+                                let editor = EditorState.set(this.state.editorState, {allowUndo: true});
+                                this.setState({focused: true, editorState: editor});
                             }}
                             onChange={(editorState)=>this.handleEdit(editorState)}
                             handleKeyCommand={this.handleKeyCommand}
@@ -149,7 +161,17 @@ function selector(dispatch) {
 
         const nextResult = {
             actions: actions,
-            selected: nextState.boardLogic.selected,
+            selected: function(){
+                let selection = nextState.boardLogic.selected;
+
+                if(Array.isArray(selection)){
+                    return selection.findIndex((elem)=> elem.id === nextOwnProps.id) !== -1
+                }
+                else if(selection){
+                    return selection.id === nextOwnProps.id;
+                }
+                else return false;
+            }(),
             savedEditorState: function() {
                 let editor = nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id);
                 if(editor && editor.data) {
@@ -163,18 +185,9 @@ function selector(dispatch) {
         nextResult.shouldUpdate = !equals(nextResult.savedEditorState, result.savedEditorState);
 
         if(!equals(nextResult, result)){
-            if(nextResult.selected) {
-                let selection = nextResult.selected;
-                if(Array.isArray(selection)){
-                    nextResult.selected = selection.findIndex((elem)=> elem.id === nextOwnProps.id) !== -1
-                }
-                else if(selection){
-                    nextResult.selected = selection.id === nextOwnProps.id;
-                }
-                else nextResult.selected = false;
-            }
             result = nextResult;
         }
+
         return result
     }
 }

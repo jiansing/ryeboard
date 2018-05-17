@@ -105,7 +105,6 @@ export const modifySettingsParam = (value) => {
 };
 
 export const setMutable = () => {
-    console.log('making mutable...');
     return {
         type: 'SET_MUTABLE'
     }
