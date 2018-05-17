@@ -1,8 +1,9 @@
 import React, {Component} from 'react';
 import {connectAdvanced} from "react-redux";
-import equals from 'fast-deep-equal';
+import equals from 'react-fast-compare';
 import {bindActionCreators} from 'redux';
 import * as Actions from "/imports/redux/actions/main";
+import { ActionCreators } from 'redux-undo';
 import { DropTarget } from 'react-dnd'
 import snapToGrid from '/imports/helper/snapToGrid'
 import update from 'updeep';
@@ -22,56 +23,75 @@ const widgetTarget = {
 
         const item = monitor.getItem();
 
-        if(item.files){
+        if(Array.isArray(item.selectedWidgets)){
+            const delta = monitor.getDifferenceFromInitialOffset();
 
-            let {x, y} = monitor.getClientOffset(),
-                top = document.getElementById('board-container').pageYOffset ||
-                    document.getElementById('board-container').scrollTop ||
-                    document.getElementById('board-container').scrollTop || 0,
-                left = document.getElementById('board-container').pageXOffset ||
-                    document.getElementById('board-container').scrollLeft ||
-                    document.getElementById('board-container').scrollLeft || 0;
+            let widgetArray = []
 
-            let uploader = new Slingshot.Upload("userImageUploads");
-            uploader.send(monitor.getItem().files[0], function (error, downloadUrl) {
-                if (error) {
-                    alert (error);
-                }
-                else {
-                    component.addWidget({data: {image: downloadUrl}, left: x + left - 75, top: y + top - 50, height: 150, width: 150, type: 'image'});
-                }
+            item.selectedWidgets.forEach(function(selection){
+                let left = selection.left + delta.x;
+                let top = selection.top + delta.y;
+
+                [left, top] = snapToGrid(left, top);
+
+                widgetArray.push({id: selection.id, left, top});
             });
-            return;
+
+            component.multiMoveWidget(widgetArray);
+
         }
-        if(item.urls){
-            let {x, y} = monitor.getClientOffset(),
-                top = document.getElementById('board-container').pageYOffset ||
-                    document.getElementById('board-container').scrollTop ||
-                    document.getElementById('board-container').scrollTop || 0,
-                left = document.getElementById('board-container').pageXOffset ||
-                    document.getElementById('board-container').scrollLeft ||
-                    document.getElementById('board-container').scrollLeft || 0;
+        else{
+            if(item.files){
 
-            let data  = item.urls[0];
+                let {x, y} = monitor.getClientOffset(),
+                    top = document.getElementById('board-container').pageYOffset ||
+                        document.getElementById('board-container').scrollTop ||
+                        document.getElementById('board-container').scrollTop || 0,
+                    left = document.getElementById('board-container').pageXOffset ||
+                        document.getElementById('board-container').scrollLeft ||
+                        document.getElementById('board-container').scrollLeft || 0;
 
-            isUrlImage(data, ()=> component.addWidget({data: {image: data}, left: x + left - 75, top: y + top - 50, height: 150, width: 150, type: 'image'}), 10000);
+                let uploader = new Slingshot.Upload("userImageUploads");
+                uploader.send(monitor.getItem().files[0], function (error, downloadUrl) {
+                    if (error) {
+                        alert (error);
+                    }
+                    else {
+                        component.addWidget({data: {image: downloadUrl}, left: x + left - 75, top: y + top - 50, height: 150, width: 150, type: 'image'});
+                    }
+                });
+            }
+            else if(item.urls){
+                let {x, y} = monitor.getClientOffset(),
+                    top = document.getElementById('board-container').pageYOffset ||
+                        document.getElementById('board-container').scrollTop ||
+                        document.getElementById('board-container').scrollTop || 0,
+                    left = document.getElementById('board-container').pageXOffset ||
+                        document.getElementById('board-container').scrollLeft ||
+                        document.getElementById('board-container').scrollLeft || 0;
 
-            return;
+                let data  = item.urls[0];
+
+                isUrlImage(data, ()=> component.addWidget({data: {image: data}, left: x + left - 75, top: y + top - 50, height: 150, width: 150, type: 'image'}), 10000);
+            }
+            else {
+                const delta = monitor.getDifferenceFromInitialOffset();
+
+                let left = item.left + delta.x;
+                let top = item.top + delta.y;
+
+                [left, top] = snapToGrid(left, top);
+
+                if(item.newWidget) {
+                    delete item.newWidget;
+                    component.addWidget(update({left, top}, item));
+                }
+                else component.moveWidget(item.id, left, top)
+
+            }
         }
 
-        const delta = monitor.getDifferenceFromInitialOffset();
-
-        let left = Math.round(item.left + delta.x);
-        let top = Math.round(item.top + delta.y);
-
-        [left, top] = snapToGrid(left, top);
-
-        if(item.newWidget) {
-            delete item.newWidget;
-            component.addWidget(update({left, top}, item));
-        }
-        else component.moveWidget(item.id, left, top)
-    },
+    }
 };
 
 function collect(connect, monitor) {
@@ -115,10 +135,57 @@ class PureBoard extends Component {
             selected: null,
             resizing: false,
         };
+        let self = this;
+        window.addEventListener('keydown', function(event){
+            if(document.activeElement === document.body){
+
+                let key = event.keyCode;
+                switch(key){
+                    case 8 : {
+                        let selected = self.props.selectedWidgets;
+                        if(Array.isArray(selected)){
+                            selected = selected.map((elem)=> elem.id)
+                        }
+                        else selected = selected.id;
+
+                        if(selected){
+                            self.props.actions.removeFromBoard(selected);
+                            self.props.actions.setMutable();
+                            Meteor.call('boards.update', store.getState());
+                        }
+
+                        break;
+                    }
+                    case 90 : {
+                        if(event.metaKey){
+                            if(event.shiftKey){
+                                self.props.actions.redo();
+                                Meteor.call('boards.update', store.getState());
+                                event.stopPropagation();
+                            }
+                            else{
+                                self.props.actions.undo();
+                                Meteor.call('boards.update', store.getState());
+                                event.stopPropagation();
+                            }
+                        }
+                    }
+                }
+            }
+        }, true);
     }
 
     selectWidget(id, data) {
         this.props.actions.selectWidgetFromBoard(id, data);
+    }
+
+    multiSelectWidget(id, data) {
+        let selection = this.props.selectedWidgets;
+        if(Array.isArray(selection) && selection.findIndex((elem)=>elem.id === id)!==-1){
+            this.props.actions.deselectWidgetFromBoard(id, data);
+        }
+        else this.props.actions.multiSelectWidgetFromBoard(id, data);
+        Meteor.call('boards.update', store.getState());
     }
 
     addWidget(data) {
@@ -127,7 +194,18 @@ class PureBoard extends Component {
         Meteor.call('boards.update', store.getState());
     }
 
+    multiMoveWidget(widgets){
+        let self = this;
+        this.props.actions.dragWidgetOnBoard(null);
+        widgets.forEach(function(widget){
+            self.props.actions.modifyBoard({id: widget.id, left: widget.left, top: widget.top});
+        });
+        this.props.actions.setMutable();
+        Meteor.call('boards.update', store.getState());
+    }
+
     moveWidget(id, left, top) {
+        this.props.actions.dragWidgetOnBoard(null);
         this.props.actions.modifyBoard({id, left, top});
         this.props.actions.setMutable();
         Meteor.call('boards.update', store.getState());
@@ -137,13 +215,22 @@ class PureBoard extends Component {
         if(!id && !height && !width) this.setState({resizing: true});
         else{
             this.props.actions.modifyBoard({id, height, width});
+            this.props.actions.setMutable();
             Meteor.call('boards.update', store.getState());
             this.setState({resizing: false});
         }
     }
 
+    deselectAllWidgets(event){
+        if(!event.shiftKey){
+            this.props.actions.deselectAllWidgetFromBoard();
+        }
+    }
+
+
     renderWidget(item) {
         return <Widget key={item.id} id={item.id} {...item}
+                       handleMultiSelect={(id, data)=>this.multiSelectWidget(id, data)}
                        handleSelect={(id, data)=>this.selectWidget(id, data)}
                        handleResize={(id, height, width)=>this.resizeWidget(id, height, width)}/>
     }
@@ -155,6 +242,7 @@ class PureBoard extends Component {
 
         return connectDropTarget(
             <div id='board-container'
+                 onClickCapture={(event)=> this.deselectAllWidgets(event)}
                  style={{marginTop: '50px', marginLeft: '75px', width: 'calc(100vw - 75px)', height: 'calc(100vh - 50px)', overflow: 'scroll'}}>
                 <DragLayer />
                 <div  id='board' ref={(container) => this.container= container}>
@@ -170,13 +258,14 @@ class PureBoard extends Component {
 
 function selector(dispatch) {
     let result = {};
-    const actions = bindActionCreators(Actions, dispatch);
+    const actions = bindActionCreators(Object.assign({}, Actions, ActionCreators), dispatch);
     return (nextState, nextOwnProps) => {
 
         nextState = nextState.undoable.present;
 
         const nextResult = {
             actions: actions,
+            selectedWidgets: nextState.boardLogic.selected,
             widgets: nextState.boardLayout
         };
 

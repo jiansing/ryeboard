@@ -17,8 +17,15 @@ const widgetSource = {
             width = props.width || 150,
             height = props.height || 150;
 
-        top += document.getElementById('preview-' + props.type).offsetTop;
-        left -= 75;
+        let topOffset = document.getElementById('preview-' + props.type).parentElement.offsetTop,
+            leftOffset = document.getElementById('preview-' + props.type).parentElement.offsetLeft;
+
+        console.log('top offset:', topOffset, '\nleftOffset:', leftOffset, '\ntop:', top, '\nleft:',left);
+
+        top += topOffset;
+        left -= 75 - leftOffset;
+
+        console.log('top:', top, '\nleft:', left);
 
         return { type, data, left, top, width, height, newWidget }
     },
@@ -63,7 +70,7 @@ class Widget extends Component {
         return connectDragSource(
             <div style={styles} id={'preview-'+this.props.type}>
                 <div style={{textAlign: 'center'}}>
-                    <img src={'/ph.svg'} height={25} width={25} />
+                    <img src={this.props.icon} height={25} width={25} />
                     <p style={{margin: '0'}}>{this.props.type}</p>
                 </div>
             </div>

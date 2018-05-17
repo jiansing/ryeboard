@@ -1,6 +1,6 @@
 import React from 'react';
 import {connectAdvanced} from "react-redux";
-import equals from 'fast-deep-equal';
+import equals from 'react-fast-compare';
 import * as Actions from "/imports/redux/actions/main";
 import { ActionCreators } from 'redux-undo';
 import {bindActionCreators} from 'redux';

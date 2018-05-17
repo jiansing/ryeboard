@@ -2,7 +2,7 @@ module.exports = {
     servers: {
         one: {
             // TODO: set host address, username, and authentication method
-            host: '13.125.234.99',
+            host: '13.209.47.209',
             username: 'ubuntu',
             pem: "../../ryestory.pem"
             // password: 'server-password'
@@ -26,7 +26,7 @@ module.exports = {
         env: {
             // TODO: Change to your app's url
             // If you are using ssl, it needs to start with https://
-            ROOT_URL: 'http://ec2-13-125-234-99.ap-northeast-2.compute.amazonaws.com/'
+            ROOT_URL: 'http://ec2-13-209-47-209.ap-northeast-2.compute.amazonaws.com/'
         },
 
         docker: {
