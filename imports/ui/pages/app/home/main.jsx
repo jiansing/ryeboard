@@ -34,6 +34,7 @@ class PureHome extends React.Component{
                 this.props.actions.setMutable();
             });
         }
+        else this.props.actions.setState();
     }
 
     render(){

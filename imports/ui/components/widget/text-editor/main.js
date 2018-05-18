@@ -47,7 +47,7 @@ class PureTextEditor extends Component{
         let id = this.props.id;
         this.props.actions.modifyBoard({id, data: {editorState: raw}});
         this.props.actions.setMutable();
-        Meteor.call('boards.update', store.getState());
+        if(Meteor.user()) Meteor.call('boards.update', store.getState());
     }
 
     handleEdit(editorState){
@@ -113,7 +113,7 @@ class PureTextEditor extends Component{
                   {...this.props}>
                 <div style={{position: 'absolute', height: '100%', width: '100%', zIndex: this.state.focused ? -1 : 3}}
                      onClick={(event)=> {
-                         if(event.shiftKey) {
+                         if(event.shiftKey && !this.state.focused) {
                              this.setState({focused: false});
                              this.focusSink.focus();
                          }

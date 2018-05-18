@@ -7,7 +7,7 @@ import deepChange from 'updeep';
 
 const DEFAULT_STATE = {
     loggedIn: false,
-    title: '',
+    title: 'Welcome to Ryeboard!',
 };
 
 function selection(state = DEFAULT_STATE, action) {

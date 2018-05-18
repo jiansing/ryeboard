@@ -51,15 +51,21 @@ const widgetTarget = {
                         document.getElementById('board-container').scrollLeft ||
                         document.getElementById('board-container').scrollLeft || 0;
 
-                let uploader = new Slingshot.Upload("userImageUploads");
-                uploader.send(monitor.getItem().files[0], function (error, downloadUrl) {
-                    if (error) {
-                        alert (error);
-                    }
-                    else {
-                        component.addWidget({data: {image: downloadUrl}, left: x + left - 75, top: y + top - 50, height: 150, width: 150, type: 'image'});
-                    }
-                });
+                if(Meteor.user()){
+                    let uploader = new Slingshot.Upload("userImageUploads");
+                    uploader.send(monitor.getItem().files[0], function (error, downloadUrl) {
+                        if (error) {
+                            alert (error);
+                        }
+                        else {
+                            component.addWidget({data: {image: downloadUrl}, left: x + left - 75, top: y + top - 50, height: 150, width: 150, type: 'image'});
+                        }
+                    });
+                }
+                else{
+                    let data  = URL.createObjectURL(monitor.getItem().files[0]);
+                    component.addWidget({data: {image: data}, left: x + left - 75, top: y + top - 50, height: 150, width: 150, type: 'image'});
+                }
             }
             else if(item.urls){
                 let {x, y} = monitor.getClientOffset(),
@@ -151,7 +157,7 @@ class PureBoard extends Component {
                         if(selected){
                             self.props.actions.removeFromBoard(selected);
                             self.props.actions.setMutable();
-                            Meteor.call('boards.update', store.getState());
+                            if(Meteor.user()) Meteor.call('boards.update', store.getState());
                         }
 
                         break;
@@ -160,12 +166,12 @@ class PureBoard extends Component {
                         if(event.metaKey){
                             if(event.shiftKey){
                                 self.props.actions.redo();
-                                Meteor.call('boards.update', store.getState());
+                                if(Meteor.user()) Meteor.call('boards.update', store.getState());
                                 event.stopPropagation();
                             }
                             else{
                                 self.props.actions.undo();
-                                Meteor.call('boards.update', store.getState());
+                                if(Meteor.user()) Meteor.call('boards.update', store.getState());
                                 event.stopPropagation();
                             }
                         }
@@ -185,13 +191,13 @@ class PureBoard extends Component {
             this.props.actions.deselectWidgetFromBoard(id, data);
         }
         else this.props.actions.multiSelectWidgetFromBoard(id, data);
-        Meteor.call('boards.update', store.getState());
+        if(Meteor.user()) Meteor.call('boards.update', store.getState());
     }
 
     addWidget(data) {
         this.props.actions.addToBoard({...data});
         this.props.actions.setMutable();
-        Meteor.call('boards.update', store.getState());
+        if(Meteor.user()) Meteor.call('boards.update', store.getState());
     }
 
     multiMoveWidget(widgets){
@@ -201,14 +207,14 @@ class PureBoard extends Component {
             self.props.actions.modifyBoard({id: widget.id, left: widget.left, top: widget.top});
         });
         this.props.actions.setMutable();
-        Meteor.call('boards.update', store.getState());
+        if(Meteor.user()) Meteor.call('boards.update', store.getState());
     }
 
     moveWidget(id, left, top) {
         this.props.actions.dragWidgetOnBoard(null);
         this.props.actions.modifyBoard({id, left, top});
         this.props.actions.setMutable();
-        Meteor.call('boards.update', store.getState());
+        if(Meteor.user()) Meteor.call('boards.update', store.getState());
     }
 
     resizeWidget(id, height, width) {
@@ -216,7 +222,7 @@ class PureBoard extends Component {
         else{
             this.props.actions.modifyBoard({id, height, width});
             this.props.actions.setMutable();
-            Meteor.call('boards.update', store.getState());
+            if(Meteor.user()) Meteor.call('boards.update', store.getState());
             this.setState({resizing: false});
         }
     }

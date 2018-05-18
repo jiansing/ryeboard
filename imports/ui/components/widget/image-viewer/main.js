@@ -59,7 +59,7 @@ class PureImageViewer extends Component{
         let id = this.props.id;
         this.props.actions.modifyBoard({id, data: {image: image}});
         this.props.actions.setMutable();
-        Meteor.call('boards.update', store.getState());
+        if(Meteor.user()) Meteor.call('boards.update', store.getState());
     }
 
     sizeToGrid(size){
@@ -106,7 +106,7 @@ class PureImageViewer extends Component{
         this.props.actions.modifyBoard({id,  width: newWidth, height: newHeight, maxSize: [Infinity, Infinity],
             minSize: minSize, data: {ratio: true} });
         this.props.actions.setMutable();
-        Meteor.call('boards.update', store.getState());
+        if(Meteor.user()) Meteor.call('boards.update', store.getState());
     }
 
     unlockAspectRatio(){
@@ -115,7 +115,7 @@ class PureImageViewer extends Component{
         this.props.actions.modifyBoard({id,  maxSize: [Infinity, Infinity],
             minSize: [90, 90], data: {ratio: false}  });
         this.props.actions.setMutable();
-        Meteor.call('boards.update', store.getState());
+        if(Meteor.user()) Meteor.call('boards.update', store.getState());
     }
 
     compileMenu(context){

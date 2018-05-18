@@ -123,7 +123,7 @@ class PureWidget extends Component {
             <div style={getStyles(this.props)}>
                 <div>
                     <ResizableBox width={this.props.width || 300} height={this.props.height || 150}
-                                  minConstraints={this.props.minSize || [90, 90]}
+                                  minConstraints={this.props.minSize || [90, 60]}
                                   onClickCapture={(event)=> this.select(event)}
                                   maxConstraints={this.props.maxSize || [Infinity, Infinity]}
                                   onResizeStart={(event)=>this.preventDndOnResize(event)}

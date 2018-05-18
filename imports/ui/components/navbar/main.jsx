@@ -31,7 +31,7 @@ class PureNavBar extends Component {
 
     saveTitle(event){
         this.props.actions.modifySettingsParam({title: event.target.value});
-        Meteor.call('boards.update', store.getState());
+        if(Meteor.user()) Meteor.call('boards.update', store.getState());
     }
 
     render() {
