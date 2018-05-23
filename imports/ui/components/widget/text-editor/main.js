@@ -8,9 +8,25 @@ import {connectAdvanced} from "react-redux";
 import equals from 'react-fast-compare';
 import {bindActionCreators} from 'redux';
 import * as Actions from "/imports/redux/actions/main";
-import {Editor, EditorState, RichUtils, convertFromRaw, convertToRaw} from 'draft-js';
+
+import {EditorState, RichUtils, convertFromRaw, convertToRaw} from 'draft-js';
+import Editor from 'draft-js-plugins-editor';
+import createLinkifyPlugin from 'draft-js-linkify-plugin';
+import createAutoListPlugin from 'draft-js-autolist-plugin'
+
 import 'draft-js/dist/Draft.css'
 import store from '/imports/redux/store';
+
+let linkify = createLinkifyPlugin({
+    component: (props) => (
+        // eslint-disable-next-line no-alert, jsx-a11y/anchor-has-content
+        <a {...props} onClick={() => window.open(props.href)} />
+    )
+});
+
+const autoListPlugin = createAutoListPlugin()
+
+let plugins = [linkify, autoListPlugin];
 
 class PureTextEditor extends Component{
 
@@ -115,15 +131,13 @@ class PureTextEditor extends Component{
                      onClick={(event)=> {
                          if(event.shiftKey && !this.state.focused) {
                              this.setState({focused: false});
-                             this.focusSink.focus();
                          }
                          else{
                              this.setState({focused: true});
                              this.editor.focus();
                          }
                      }}/>
-                <div style={{height: '100%', width: '100%', overflowY: 'auto', padding: '15px', outline: 'none'}} tabIndex={-1}
-                     ref={(focusSink)=>this.focusSink = focusSink}
+                <div style={{height: '100%', width: '100%', overflowY: 'auto', padding: '15px', outline: 'none'}}
                      onClick={()=> this.editor.focus()}
                      onBlur={()=>{
                          this.setState({focused: false});
@@ -133,6 +147,7 @@ class PureTextEditor extends Component{
                      }}>
                     <Editor editorState={this.state.editorState}
                             readOnly={!this.state.focused}
+                            plugins={plugins}
                             onBlur={()=>{
                                 let editor = EditorState.set(this.state.editorState, {allowUndo: false});
                                 this.setState({focused: false, editorState: editor});

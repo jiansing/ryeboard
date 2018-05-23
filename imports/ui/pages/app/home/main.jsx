@@ -27,6 +27,7 @@ class PureHome extends React.Component{
 
     setData(){
         if(this.props.currentUser){
+            Meteor.call('boards.initialize');
             Meteor.call('boards.find', (error, result) => {
                 if(error || typeof result === 'undefined') return '';
                 let state = result.state;

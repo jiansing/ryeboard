@@ -19,7 +19,6 @@ function selection(state = DEFAULT_STATE, action) {
         }
 
         case types.BOARD_REMOVE: {
-            console.log("removing...", action.value);
             let newState = state.slice();
             if(Array.isArray(action.value)){
                 action.value.forEach(function(selection){
@@ -41,6 +40,7 @@ function selection(state = DEFAULT_STATE, action) {
             return newState;
         }
 
+        case types.BOARD_MULTI_SELECT_WIDGET :
         case types.BOARD_SELECT_WIDGET: {
             if(action.value === null) return state;
             let newState = state.slice();
