@@ -17,7 +17,9 @@ const widgetSource = {
     beginDrag(props) {
 
         let { id, type, left, top, width, height, selectedWidgets } = props;
+
         document.activeElement.blur();
+
         if(selectedWidgets === null) {
             props.handleSelect(props.id, {menu: props.dragging ? null : props.menu()});
             selectedWidgets = [{id, type, left, top, width, height}];
@@ -145,7 +147,6 @@ function selector(dispatch) {
     return (nextState, nextOwnProps) => {
 
         nextState = nextState.undoable.present;
-
         const nextResult = {
             dragging: function(){
                 let dragging = nextState.boardLogic.dragging;
@@ -170,6 +171,10 @@ function selector(dispatch) {
                     return [nextState.boardLayout.find((elem) => elem.id === selected.id)];
                 }
             }(),
+            width: nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id).width,
+            height: nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id).height,
+            top: nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id).top,
+            left: nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id).left,
             ...nextOwnProps
         };
 

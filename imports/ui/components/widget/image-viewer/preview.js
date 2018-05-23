@@ -12,7 +12,7 @@ export default class Preview extends Component{
 
     render(){
         return(
-            <PreviewCore icon='/icons/image.svg' type={'image'}/>
+            <PreviewCore icon='/icons/image.svg' height={150} width={150} type={'image'}/>
         )
     }
 }

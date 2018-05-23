@@ -244,7 +244,7 @@ class PureBoard extends Component {
 
 
     renderWidget(item) {
-        return <Widget key={item.id} id={item.id} {...item}
+        return <Widget key={item.id} id={item.id} type={item.type}
                        handleMultiSelect={(id, data)=>this.multiSelectWidget(id, data)}
                        handleSelect={(id, data)=>this.selectWidget(id, data)}
                        handleResize={(id, height, width)=>this.resizeWidget(id, height, width)}/>

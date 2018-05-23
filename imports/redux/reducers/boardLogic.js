@@ -22,7 +22,6 @@ function selection(state = DEFAULT_STATE, action) {
         case types.BOARD_MULTI_SELECT_WIDGET: {
             let newState = JSON.parse(JSON.stringify(state));
 
-            console.log(action.value);
             if(Array.isArray(newState.selected)){
                 newState.selected.push(action.value);
             }
@@ -47,21 +46,20 @@ function selection(state = DEFAULT_STATE, action) {
             let newState = JSON.parse(JSON.stringify(state));
             if(Array.isArray(newState.selected)){
                 let deselectedIndex = newState.selected.findIndex((element)=> element.id === action.value);
-                console.log(deselectedIndex);
                 newState.selected.splice(deselectedIndex, 1);
                 if(newState.selected.length === 0) newState.selected = null;
             }
             else{
                 newState.selected = null;
             }
-            console.log(state, newState);
+
             return newState;
         }
 
         case types.BOARD_DRAG_WIDGET: {
             let newState = JSON.parse(JSON.stringify(state));
             newState.dragging = action.value;
-            console.log('dragging widget:', newState.dragging);
+
             return newState;
         }
 
