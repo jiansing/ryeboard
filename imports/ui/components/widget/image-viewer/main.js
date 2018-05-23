@@ -68,24 +68,6 @@ class PureImageViewer extends Component{
         if(Meteor.user()) Meteor.call('boards.update', store.getState());
     }
 
-    sizeToGrid(size){
-        let {width, height} = size;
-
-        let widthOffset = width % 15,
-            heightOffset = height % 15;
-
-        if(widthOffset > 7)  width += 15 - widthOffset;
-        else width -= widthOffset;
-
-        if(heightOffset > 7)  height += 15 - heightOffset;
-        else height -= heightOffset;
-
-        let newHeight = height,
-            newWidth = width;
-
-        return {newHeight, newWidth};
-    }
-
     lockAspectRatio(){
         if(!this.props.imageData) return '';
 
@@ -126,7 +108,7 @@ class PureImageViewer extends Component{
         let ratio = {
             condition: (data)=> typeof data !== 'undefined' && typeof data.image !== 'undefined' && data.image,
             icon: '/icons/ratio.svg',
-            title: (data) => {if(data) return data.ratio ? 'unset ratio' : 'set ratio'},
+            title: (data) => {if(data) return data.ratio ? 'unlock ratio' : 'lock ratio'},
             fun: (data)=> {if(data)  return data.ratio ? this.unlockAspectRatio() : this.lockAspectRatio()}
         };
         return [ratio];
@@ -201,10 +183,15 @@ function selector(dispatch) {
                 }
                 else return null;
             }(),
-            width: nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id).width,
-            height: nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id).height,
             ...nextOwnProps
         };
+
+        if(!nextOwnProps.width && !nextOwnProps.height){
+            let elem = nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id);
+
+            nextResult.width = elem.width;
+            nextResult.height = elem.height;
+        }
 
         if(!equals(nextResult, result)){
             result = nextResult;

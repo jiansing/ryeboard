@@ -21,7 +21,7 @@ const widgetSource = {
         document.activeElement.blur();
 
         if(selectedWidgets === null) {
-            props.handleSelect(props.id, {menu: props.dragging ? null : props.menu()});
+            props.handleSelect(props.id, {menu: props.dragging ? null : props.menu});
             selectedWidgets = [{id, type, left, top, width, height}];
         }
         if(selectedWidgets.findIndex((elem)=>elem.id===id) === -1){
@@ -110,10 +110,10 @@ class PureWidget extends Component {
 
     select(event){
         if(event.shiftKey && !this.props.selected) {
-            this.props.handleMultiSelect(this.props.id, {menu: this.props.dragging ? null : this.props.menu()});
+            this.props.handleMultiSelect(this.props.id, {menu: this.props.dragging ? null : this.props.menu});
         }
         else {
-            this.props.handleSelect(this.props.id, {menu: this.props.dragging ? null : this.props.menu()});
+            this.props.handleSelect(this.props.id, {menu: this.props.dragging ? null : this.props.menu});
         }
     }
 
@@ -171,12 +171,22 @@ function selector(dispatch) {
                     return [nextState.boardLayout.find((elem) => elem.id === selected.id)];
                 }
             }(),
-            width: nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id).width,
-            height: nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id).height,
-            top: nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id).top,
-            left: nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id).left,
             ...nextOwnProps
         };
+
+        if(!nextOwnProps.width && !nextOwnProps.height){
+            let elem = nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id);
+
+            nextResult.width = elem.width;
+            nextResult.height = elem.height;
+        }
+
+        if(!nextOwnProps.top && !nextOwnProps.left){
+            let elem = nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id);
+
+            nextResult.top = elem.top;
+            nextResult.left = elem.left;
+        }
 
         if(!equals(nextResult, result)){
             result = nextResult;
