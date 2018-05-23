@@ -67,6 +67,17 @@ class PureTextEditor extends Component{
     }
 
     handleEdit(editorState){
+
+        console.log('handle edit');
+        let content = editorState.getCurrentContent();
+        let raw = convertToRaw(content);
+        let id = this.props.id;
+        this.props.actions.modifyBoard({id, data: {style: [
+            editorState.getCurrentInlineStyle().has('BOLD'),
+            editorState.getCurrentInlineStyle().has('ITALIC'),
+            editorState.getCurrentInlineStyle().has('UNDERLINE')
+        ]}});
+
         this.setState({editorState: editorState});
     }
 
@@ -97,21 +108,21 @@ class PureTextEditor extends Component{
     compileMenu(){
         let bold = {
                 condition: ()=> true,
-                selected: () => this.state.editorState.getCurrentInlineStyle().has('BOLD'),
+                selected: (data) => data.style[0],
                 icon: '/icons/bold-text.svg',
                 title: ()=> 'bold',
                 fun: (test)=> this.onBoldClick(test)
             },
             italic = {
                 condition: ()=> true,
-                selected: (data) => this.state.editorState.getCurrentInlineStyle().has('ITALIC'),
+                selected: (data) => data.style[1],
                 icon: '/icons/italic-text.svg',
                 title: () => 'italic',
                 fun: ()=> this.onItalicClick()
             },
             underline = {
                 condition: ()=> true,
-                selected: (data) => this.state.editorState.getCurrentInlineStyle().has('UNDERLINE'),
+                selected: (data) => data.style[2],
                 icon: '/icons/underline-text.svg',
                 title: () => 'underline',
                 fun: ()=> this.onUnderlineClick()
