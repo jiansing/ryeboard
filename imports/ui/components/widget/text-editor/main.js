@@ -68,7 +68,6 @@ class PureTextEditor extends Component{
 
     handleEdit(editorState){
 
-        console.log('handle edit');
         let content = editorState.getCurrentContent();
         let raw = convertToRaw(content);
         let id = this.props.id;
@@ -108,21 +107,21 @@ class PureTextEditor extends Component{
     compileMenu(){
         let bold = {
                 condition: ()=> true,
-                selected: (data) => data.style[0],
+                selected: (data) => data.style ? data.style[0] : false,
                 icon: '/icons/bold-text.svg',
                 title: ()=> 'bold',
                 fun: (test)=> this.onBoldClick(test)
             },
             italic = {
                 condition: ()=> true,
-                selected: (data) => data.style[1],
+                selected: (data) => data.style ? data.style[1] : false,
                 icon: '/icons/italic-text.svg',
                 title: () => 'italic',
                 fun: ()=> this.onItalicClick()
             },
             underline = {
                 condition: ()=> true,
-                selected: (data) => data.style[2],
+                selected: (data) => data.style ? data.style[2] : false,
                 icon: '/icons/underline-text.svg',
                 title: () => 'underline',
                 fun: ()=> this.onUnderlineClick()

@@ -39,11 +39,9 @@ class PureDragLayer extends Component {
 
         switch (type) {
             case 'widget':
-                return  <Widget key={item.id} offsetTop={offsetTop} offsetLeft={offsetLeft} preview {...item}/>;
+                return  <Widget key={item.id} id={item.id} type={item.type} preview offsetTop={offsetTop} offsetLeft={offsetLeft}/>;
             case 'widgetPreview':
-                return  <Widget key={item.id} id={item.id} type={item.type}
-                                preview data={item.data}
-                                width={item.width} height={item.height}/>;
+                return  <Widget key={item.id} id={item.id} type={item.type} preview/>;
             default:
                 return null;
         }
