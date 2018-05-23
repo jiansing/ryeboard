@@ -17,6 +17,7 @@ class PureMenu extends Component {
 
     renderPreviews(){
         return previews.map(function(Elem){
+
             return (
                 <div className='draggable-widgets' key={Math.random()} style={{padding: '5px', width: '100%'}}>
                     <Elem />
@@ -29,8 +30,10 @@ class PureMenu extends Component {
 
         let self = this;
         return this.props.currentMenu.map(function(elem){
+
             let selected = true;
-            if(!elem.condition || !elem.condition(self.props.currentContext.data)) return '';
+            if(!elem.title) return ''
+            if(elem.condition && !elem.condition(self.props.currentContext.data)) return '';
             if(elem.selected) {
                 selected = elem.selected(self.props.currentContext.data);
             }
@@ -49,6 +52,8 @@ class PureMenu extends Component {
     }
 
     render() {
+
+        console.log(this.props.currentMenu);
 
         return (
             <div style={{background: '#F2F2F2', marginTop: '50px', height: 'calc(100vh - 50px)', display: 'flex', position: 'fixed', top: 0,
@@ -80,11 +85,12 @@ function selector(dispatch) {
         const nextResult = {
             selection: selection,
             currentMenu: selection ? function(){
-                if(Array.isArray(selection)) {
+                if(Array.isArray(selection) || nextState.boardLogic.dragging) {
                     return null;
                 }
-                return selection && selection.data ?
+                let menu = selection && selection.data ?
                     selection.data.menu : null;
+                return menu ? menu() : null;
             }() : null,
             currentContext: selection ? function(){
                 if(Array.isArray(selection)) return null;

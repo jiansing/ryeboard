@@ -20,7 +20,7 @@ function getItemStyles(props) {
         }
     }
 
-    let { x, y } = currentOffset
+    let { x, y } = currentOffset;
 
     const transform = `translate(${x}px, ${y}px)`;
     return {
@@ -31,17 +31,15 @@ function getItemStyles(props) {
 
 class PureDragLayer extends Component {
 
-    componentDidMount(){
-        console.log('mounted drag layer');
-    }
-
     renderItem(type, item, offsetTop, offsetLeft) {
 
         switch (type) {
             case 'widget':
-                return  <Widget key={item.id} id={item.id} type={item.type} preview offsetTop={offsetTop} offsetLeft={offsetLeft}/>;
+                return  <Widget key={item.id} id={item.id} type={item.type}
+                                offsetTop={offsetTop} offsetLeft={offsetLeft} preview/>;
             case 'widgetPreview':
-                return  <Widget key={item.id} id={item.id} type={item.type} preview/>;
+                return  <Widget key={item.id} id={item.id} type={item.type}
+                                width={item.width} left={item.left} preview/>;
             default:
                 return null;
         }
@@ -62,7 +60,6 @@ class PureDragLayer extends Component {
             <div style={layerStyles}>
                 <div style={getItemStyles(this.props)}>
                     {widgets}
-                    {/*this.renderItem(itemType, item)*/}
                 </div>
             </div>
         )
