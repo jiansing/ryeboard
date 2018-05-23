@@ -165,23 +165,26 @@ class PureBoard extends Component {
             }
             if(self.props.selectedWidgets){
                 let key = event.keyCode;
-                if(!document.activeElement === document.body)
-                switch(key){
-                    case 8 : {
-                        let selected = self.props.selectedWidgets;
-                        if(Array.isArray(selected)){
-                            selected = selected.map((elem)=> elem.id)
-                        }
-                        else selected = selected.id;
 
-                        if(selected){
-                            self.props.actions.removeFromBoard(selected);
-                            self.props.actions.setMutable();
-                            if(Meteor.user()) Meteor.call('boards.update', store.getState());
-                        }
+                if(document.activeElement === document.body){
+                    switch(key){
+                        case 8 : {
+                            let selected = self.props.selectedWidgets;
+                            if(Array.isArray(selected)){
+                                selected = selected.map((elem)=> elem.id)
+                            }
+                            else selected = selected.id;
 
-                        break;
+                            if(selected){
+                                self.props.actions.removeFromBoard(selected);
+                                self.props.actions.setMutable();
+                                if(Meteor.user()) Meteor.call('boards.update', store.getState());
+                            }
+
+                            break;
+                        }
                     }
+
                 }
             }
         }, true);

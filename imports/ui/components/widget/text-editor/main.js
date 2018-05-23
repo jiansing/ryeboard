@@ -12,7 +12,7 @@ import * as Actions from "/imports/redux/actions/main";
 import {EditorState, RichUtils, convertFromRaw, convertToRaw} from 'draft-js';
 import Editor from 'draft-js-plugins-editor';
 import createLinkifyPlugin from 'draft-js-linkify-plugin';
-import createEmojiPlugin from 'draft-js-emoji-plugin';
+import createAutoListPlugin from 'draft-js-autolist-plugin'
 
 import 'draft-js/dist/Draft.css'
 import store from '/imports/redux/store';
@@ -24,10 +24,9 @@ let linkify = createLinkifyPlugin({
     )
 });
 
-let emoji = createEmojiPlugin();
-const { EmojiSuggestions, EmojiSelect } = emojiPlugin;
+const autoListPlugin = createAutoListPlugin()
 
-let plugins = [linkify, emoji];
+let plugins = [linkify, autoListPlugin];
 
 class PureTextEditor extends Component{
 
@@ -132,15 +131,13 @@ class PureTextEditor extends Component{
                      onClick={(event)=> {
                          if(event.shiftKey && !this.state.focused) {
                              this.setState({focused: false});
-                             this.focusSink.focus();
                          }
                          else{
                              this.setState({focused: true});
                              this.editor.focus();
                          }
                      }}/>
-                <div style={{height: '100%', width: '100%', overflowY: 'auto', padding: '15px', outline: 'none'}} tabIndex={-1}
-                     ref={(focusSink)=>this.focusSink = focusSink}
+                <div style={{height: '100%', width: '100%', overflowY: 'auto', padding: '15px', outline: 'none'}}
                      onClick={()=> this.editor.focus()}
                      onBlur={()=>{
                          this.setState({focused: false});
@@ -164,8 +161,6 @@ class PureTextEditor extends Component{
                             handleKeyCommand={this.handleKeyCommand}
                             handleDrop={()=>true} placeholder={'write something!'}
                             ref={(editor)=> this.editor = editor}/>
-                    <EmojiSuggestions />
-                    <EmojiSelect />
                 </div>
             </Core>
         )

@@ -29,18 +29,19 @@ class PureMenu extends Component {
 
         let self = this;
         return this.props.currentMenu.map(function(elem){
-            let selected = false;
+            let selected = true;
             if(!elem.condition || !elem.condition(self.props.currentContext.data)) return '';
             if(elem.selected) {
                 selected = elem.selected(self.props.currentContext.data);
             }
+
             return (
                 <div style={{textAlign: 'center', width: '100%', padding: '5px'}}
                      key={elem.title(self.props.currentContext.data)}
                      onClick={()=>{
                          elem.fun(self.props.currentContext.data);
                      }}>
-                    <img src={elem.icon} height={20} width={20}/>
+                    <img src={elem.icon} height={20} width={20} style={{opacity: selected ? 1 : .25}}/>
                     <p style={{margin: '0', fontSize: '.85rem'}}>{elem.title(self.props.currentContext.data)}</p>
                 </div>
             )
