@@ -147,6 +147,26 @@ class PureBoard extends Component {
 
                 let key = event.keyCode;
                 switch(key){
+                    case 90 : {
+                        if(event.metaKey){
+                            if(event.shiftKey){
+                                self.props.actions.redo();
+                                if(Meteor.user()) Meteor.call('boards.update', store.getState());
+                                event.stopPropagation();
+                            }
+                            else{
+                                self.props.actions.undo();
+                                if(Meteor.user()) Meteor.call('boards.update', store.getState());
+                                event.stopPropagation();
+                            }
+                        }
+                    }
+                }
+            }
+            if(self.props.selectedWidgets){
+                let key = event.keyCode;
+                if(!document.activeElement === document.body)
+                switch(key){
                     case 8 : {
                         let selected = self.props.selectedWidgets;
                         if(Array.isArray(selected)){
@@ -161,20 +181,6 @@ class PureBoard extends Component {
                         }
 
                         break;
-                    }
-                    case 90 : {
-                        if(event.metaKey){
-                            if(event.shiftKey){
-                                self.props.actions.redo();
-                                if(Meteor.user()) Meteor.call('boards.update', store.getState());
-                                event.stopPropagation();
-                            }
-                            else{
-                                self.props.actions.undo();
-                                if(Meteor.user()) Meteor.call('boards.update', store.getState());
-                                event.stopPropagation();
-                            }
-                        }
                     }
                 }
             }

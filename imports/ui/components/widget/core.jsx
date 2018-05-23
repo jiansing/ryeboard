@@ -107,7 +107,7 @@ class PureWidget extends Component {
     }
 
     select(event){
-        if(event.shiftKey) {
+        if(event.shiftKey && !this.props.selected) {
             this.props.handleMultiSelect(this.props.id, {menu: this.props.dragging ? null : this.props.menu()});
         }
         else {
