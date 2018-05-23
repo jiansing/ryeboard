@@ -69,33 +69,32 @@ class PureMenu extends Component {
 
 function selector(dispatch) {
     let result = {};
+
     const actions = bindActionCreators(Actions, dispatch);
     return (nextState, nextOwnProps) => {
 
         nextState = nextState.undoable.present;
 
+        let selection = nextState.boardLogic.selected;
+
         const nextResult = {
-            selection: nextState.boardLogic.selected,
+            selection: selection,
+            currentMenu: selection ? function(){
+                if(Array.isArray(selection)) {
+                    return null;
+                }
+                return selection && selection.data ?
+                    selection.data.menu : null;
+            }() : null,
+            currentContext: selection ? function(){
+                if(Array.isArray(selection)) return null;
+                let selectedWidget = nextState.boardLayout.findIndex((elem) => elem.id === selection.id);
+                return  nextState.boardLayout[selectedWidget];
+            }() : null,
             ...nextOwnProps,
         };
 
         if(!equals(nextResult, result)){
-
-            nextResult.currentMenu = function(){
-                if(Array.isArray(nextState.boardLogic.selected)) {
-                    return null;
-                }
-                let menu = nextState.boardLogic.selected && nextState.boardLogic.selected.data ?
-                    nextState.boardLogic.selected.data.menu : null;
-                return menu;
-            }();
-
-            nextResult.currentContext = nextState.boardLogic.selected ? function(){
-                if(Array.isArray(nextState.boardLogic.selected)) return null;
-                let selectedWidget = nextState.boardLayout.findIndex((elem) => elem.id === nextState.boardLogic.selected.id);
-                return  nextState.boardLayout[selectedWidget];
-            }() : null;
-
             result = nextResult;
         }
         return result

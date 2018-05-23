@@ -18,16 +18,22 @@ const ImageTarget = {
 
         let item = monitor.getItem();
         if(item.files){
-            let uploader = new Slingshot.Upload("userImageUploads");
-            uploader.send(monitor.getItem().files[0], function (error, downloadUrl) {
-                if (error) {
-                    alert (error);
-                }
-                else {
-                    component.setImage(downloadUrl);
-                }
-            });
-            return;
+
+            if(Meteor.user()){
+                let uploader = new Slingshot.Upload("userImageUploads");
+                uploader.send(monitor.getItem().files[0], function (error, downloadUrl) {
+                    if (error) {
+                        alert (error);
+                    }
+                    else {
+                        component.setImage(downloadUrl);
+                    }
+                });
+            }
+            else{
+                let data  = URL.createObjectURL(monitor.getItem().files[0]);
+                component.setImage(data);
+            }
         }
         if(item.urls){
             let data  = item.urls[0];
@@ -85,9 +91,7 @@ class PureImageViewer extends Component{
 
         let id = this.props.id,
             currentWidth = this.props.width,
-            currentHeight = this.props.height,
-            maxWidth = this.props.maxWidth,
-            maxHeight = this.props.maxHeight;
+            currentHeight = this.props.height;
 
         let ratio, newWidth, newHeight, minSize;
 
@@ -95,13 +99,13 @@ class PureImageViewer extends Component{
             ratio = this.image.naturalHeight / this.image.naturalWidth;
             newWidth = currentWidth;
             newHeight = ratio * currentWidth;
-            minSize = [90, ratio * 90]
+            minSize = [150, ratio * 150]
         }
         else{
             ratio = this.image.naturalWidth / this.image.naturalHeight;
             newWidth = ratio * currentHeight;
             newHeight = currentHeight;
-            minSize = [ratio * 90, 90]
+            minSize = [ratio * 150, 150]
         }
         this.props.actions.modifyBoard({id,  width: newWidth, height: newHeight, maxSize: [Infinity, Infinity],
             minSize: minSize, data: {ratio: true} });
@@ -113,7 +117,7 @@ class PureImageViewer extends Component{
         let {id} = this.props;
         this.setState({ratio: false});
         this.props.actions.modifyBoard({id,  maxSize: [Infinity, Infinity],
-            minSize: [90, 90], data: {ratio: false}  });
+            minSize: [150, 150], data: {ratio: false}  });
         this.props.actions.setMutable();
         if(Meteor.user()) Meteor.call('boards.update', store.getState());
     }
@@ -136,6 +140,7 @@ class PureImageViewer extends Component{
             <Core selected={this.props.selected}
                   focused={this.state.focused}
                   menu={this.props.preview ? null : ()=>this.compileMenu()}
+                  minSize={[150, 150]}
                   resizeOpts={{lockAspectRatio: this.props.ratio}}
                   {...this.props}>
                 {connectDropTarget(
@@ -152,7 +157,7 @@ class PureImageViewer extends Component{
                                  ref={(preview) => this.preview = preview}>
                                 {this.props.imageData ?
                                     <img ref={(image) => this.image = image} src={this.props.imageData} style={{height: '100%', width: '100%', outline: 'none', pointerEvents: 'none'}}/>
-                                    : <h4>Drag an Image here</h4>}
+                                    : <label style={{color: 'gray'}}>Drag or Paste an Image here</label>}
                             </div>
                         </div>
                     </div>
@@ -196,6 +201,8 @@ function selector(dispatch) {
                 }
                 else return null;
             }(),
+            width: nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id).width,
+            height: nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id).height,
             ...nextOwnProps
         };
 
