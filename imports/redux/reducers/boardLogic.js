@@ -6,12 +6,19 @@ import * as types from '../constants/actionTypes';
 
 const DEFAULT_STATE = {
     selected: null,
+    data: null,
     dragging: null
 };
 
 function selection(state = DEFAULT_STATE, action) {
 
     switch (action.type) {
+
+        case types.BOARD_SET_SELECTED_WIDGET_DATA: {
+            let newState = Object.assign(state);
+            newState.data = action.value;
+            return newState;
+        }
 
         case types.BOARD_SELECT_WIDGET: {
             let newState = Object.assign(state);

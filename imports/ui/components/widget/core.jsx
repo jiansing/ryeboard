@@ -20,8 +20,6 @@ const widgetSource = {
 
         document.activeElement.blur();
 
-        console.log(selectedWidgets);
-
         if(selectedWidgets === null) {
             props.handleSelect(props.id, {menu: props.menu});
             console.log('single drag with menu:', props.menu);
@@ -113,7 +111,7 @@ class PureWidget extends Component {
     }
 
     select(event){
-        if(event.shiftKey && !this.props.selected) {
+        if(event.shiftKey) {
             this.props.handleMultiSelect(this.props.id, {menu: this.props.menu});
         }
         else {

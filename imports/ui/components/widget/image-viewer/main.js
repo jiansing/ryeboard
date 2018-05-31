@@ -17,53 +17,37 @@ import getAspectRatio from './tools/getAspectRatio';
 import ReactCrop from 'react-image-crop';
 import rotateImage from './tools/rotate';
 
+function uploadFileToS3(file, setImage){
+    file = file[0];
+
+    if(Meteor.user()){
+        let uploader = new Slingshot.Upload("userImageUploads");
+        uploader.send(file, function (error, downloadUrl) {
+            if (error) {
+                alert (error);
+            }
+            else {
+                setImage(downloadUrl);
+            }
+        });
+    }
+    else{
+        let data  = URL.createObjectURL(file.files[0]);
+        setImage(data);
+    }
+}
+
 const ImageTarget = {
     drop(props, monitor, component) {
 
         let item = monitor.getItem();
         if(item.files){
 
-            if(Meteor.user()){
-                let uploader = new Slingshot.Upload("userImageUploads");
-                uploader.send(monitor.getItem().files[0], function (error, downloadUrl) {
-                    if (error) {
-                        alert (error);
-                    }
-                    else {
-                        component.setImage(downloadUrl);
-                    }
-                });
-            }
-            else{
-                let data  = URL.createObjectURL(monitor.getItem().files[0]);
-                component.setImage(data);
-            }
+            uploadFileToS3(monitor.getItem().files, (image)=> component.setImage(image));
+
         }
         if(item.urls){
             let data  = item.urls[0];
-
-            /*console.log('pasting image from url');
-
-            let xhr = new XMLHttpRequest();
-            xhr.open('GET', data, true);
-
-            xhr.responseType = 'arraybuffer';
-
-            xhr.onload = function(e) {
-                if (this.status === 200) {
-                    let uInt8Array = new Uint8Array(this.response);
-
-                    for (let i = 0, len = uInt8Array.length; i < len; ++i) {
-                        uInt8Array[i] = this.response[i];
-                    }
-
-                    let byte3 = uInt8Array[4];
-
-                    console.log("data:image/png;base64," + byte3, uInt8Array);
-                }
-            }
-
-            xhr.send();*/
 
             isUrlImage(data, ()=>  component.setImage(data), 10000);
         }
@@ -136,7 +120,13 @@ class PureImageViewer extends Component{
             condition: (data)=> typeof data !== 'undefined' && typeof data.image !== 'undefined' && data.image,
             icon: '/icons/ratio.svg',
             title: () => 'rotate',
-            fun: (data)=> {if(data) rotateImage(this.image, function(tempImage, image) {
+            fun: (context, data)=> {
+                console.log('checking data:', data);
+                if(data == null || !data.rotating) rotateImage(this.image, function(tempImage, image) {
+
+                    console.log('setting rotate to true');
+                self.props.actions.setSelectedWidgetData({rotating: true});
+
                 self.setImage(tempImage);
                 let uploader = new Slingshot.Upload("userImageUploads");
                 uploader.send(image, function (error, downloadUrl) {
@@ -144,7 +134,11 @@ class PureImageViewer extends Component{
                         alert(error);
                     }
                     else {
-                        if(tempImage === self.image.src) self.setImage(downloadUrl);
+                        if(tempImage === self.image.src) {
+                            console.log('setting rotate to false');
+                            self.props.actions.setSelectedWidgetData({rotating: false});
+                            self.setImage(downloadUrl);
+                        }
                     }
                 });
             })}
@@ -164,7 +158,14 @@ class PureImageViewer extends Component{
             fun: (data)=> {if(data)  return data.ratio ? this.unlockAspectRatio() : this.lockAspectRatio()}
         };
 
-        return [ratio, rotate];
+        let uploadFile = {
+            condition: (data)=> data == null || data.image == null,
+            icon: '/icons/ratio.svg',
+            title: (data) => 'upload image',
+            fun: (data)=> this.input.click()
+        };
+
+        return [ratio, rotate, uploadFile];
     }
 
     render(){
@@ -191,14 +192,17 @@ class PureImageViewer extends Component{
                                 height: '100%', width: '100%', textAlign: 'center', outline: 'none'}}
                                  ref={(preview) => this.preview = preview}>
                                 {this.props.imageData ?
-                                    <img ref={(image) => this.image = image} src={this.props.imageData}
+                                    <img ref={(image) => this.image = image}
                                          crossOrigin={'anonymous'}
+                                         src={this.props.imageData}
                                          style={{height: '100%', width: '100%', outline: 'none', pointerEvents: 'none'}}/>
                                     : <label style={{color: 'gray'}}>Drag or Paste an Image here</label>}
                             </div>
                         </div>
                     </div>
                 )}
+                <input style={{height: "0px", width: "0px", display: 'none'}} type="file" id="input" accept="image/*"
+                       onChange = {(event)=> uploadFileToS3(event.target.files, (image)=>this.setImage(image))} ref={(c)=> this.input = c}/>
             </Core>
         )
     }

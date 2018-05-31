@@ -142,6 +142,7 @@ class PureBoard extends Component {
             resizing: false,
         };
         let self = this;
+
         window.addEventListener('keydown', function(event){
             if(document.activeElement === document.body){
 
@@ -175,7 +176,11 @@ class PureBoard extends Component {
                             }
                             else selected = selected.id;
 
-                            if(selected){
+
+                            console.log('delete:', selected);
+
+                            if(selected != null){
+                                console.log('removing');
                                 self.props.actions.removeFromBoard(selected);
                                 self.props.actions.setMutable();
                                 if(Meteor.user()) Meteor.call('boards.update', store.getState());
@@ -196,6 +201,7 @@ class PureBoard extends Component {
 
     multiSelectWidget(id, data) {
         let selection = this.props.selectedWidgets;
+        console.log('multi select test:', selection);
         if(Array.isArray(selection) && selection.findIndex((elem)=>elem.id === id)!==-1){
             this.props.actions.deselectWidgetFromBoard(id, data);
         }

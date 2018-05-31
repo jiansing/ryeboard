@@ -107,21 +107,21 @@ class PureTextEditor extends Component{
     compileMenu(){
         let bold = {
                 condition: ()=> true,
-                selected: (data) => data.style ? data.style[0] : false,
+                selected: (context) => context.style ? context.style[0] : false,
                 icon: '/icons/bold-text.svg',
                 title: ()=> 'bold',
                 fun: (test)=> this.onBoldClick(test)
             },
             italic = {
                 condition: ()=> true,
-                selected: (data) => data.style ? data.style[1] : false,
+                selected: (context) => context.style ? context.style[1] : false,
                 icon: '/icons/italic-text.svg',
                 title: () => 'italic',
                 fun: ()=> this.onItalicClick()
             },
             underline = {
                 condition: ()=> true,
-                selected: (data) => data.style ? data.style[2] : false,
+                selected: (context) => context.style ? context.style[2] : false,
                 icon: '/icons/underline-text.svg',
                 title: () => 'underline',
                 fun: ()=> this.onUnderlineClick()

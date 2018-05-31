@@ -42,7 +42,7 @@ class PureMenu extends Component {
                 <div style={{textAlign: 'center', width: '100%', padding: '5px'}}
                      key={elem.title(self.props.currentContext.data)}
                      onClick={()=>{
-                         elem.fun(self.props.currentContext.data);
+                         elem.fun(self.props.currentContext.data, self.props.currentData);
                      }}>
                     <img src={elem.icon} height={20} width={20} style={{opacity: selected ? 1 : .25}}/>
                     <p style={{margin: '0', fontSize: '.85rem'}}>{elem.title(self.props.currentContext.data)}</p>
@@ -82,6 +82,12 @@ function selector(dispatch) {
 
         const nextResult = {
             selection: selection,
+            currentData: function(){
+                if(Array.isArray(selection)) {
+                    return null;
+                }
+                return nextState.boardLogic.data;
+            }(),
             currentMenu: selection ? function(){
                 if(Array.isArray(selection)) {
                     return null;

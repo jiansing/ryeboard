@@ -20,7 +20,8 @@ export default function(image, fun){
 
     //Callback!
     if(fun){
-        let dataURL = canvas.toDataURL("image/png");
+        console.log('finished rotating');
+        let dataURL = canvas.toDataURL("image/png", 1);
         let blobData = dataURItoBlob(dataURL);
         let nameParts = image.src.split(/[\s/]+/),
             name = nameParts[nameParts.length-1];
