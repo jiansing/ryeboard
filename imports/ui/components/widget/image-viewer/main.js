@@ -13,6 +13,10 @@ import { NativeTypes } from 'react-dnd-html5-backend';
 import isUrlImage from '/imports/helper/isUrlImage';
 import store from '/imports/redux/store';
 
+import getAspectRatio from './tools/getAspectRatio';
+import ReactCrop from 'react-image-crop';
+import rotateImage from './tools/rotate';
+
 const ImageTarget = {
     drop(props, monitor, component) {
 
@@ -37,6 +41,30 @@ const ImageTarget = {
         }
         if(item.urls){
             let data  = item.urls[0];
+
+            /*console.log('pasting image from url');
+
+            let xhr = new XMLHttpRequest();
+            xhr.open('GET', data, true);
+
+            xhr.responseType = 'arraybuffer';
+
+            xhr.onload = function(e) {
+                if (this.status === 200) {
+                    let uInt8Array = new Uint8Array(this.response);
+
+                    for (let i = 0, len = uInt8Array.length; i < len; ++i) {
+                        uInt8Array[i] = this.response[i];
+                    }
+
+                    let byte3 = uInt8Array[4];
+
+                    console.log("data:image/png;base64," + byte3, uInt8Array);
+                }
+            }
+
+            xhr.send();*/
+
             isUrlImage(data, ()=>  component.setImage(data), 10000);
         }
     },
@@ -62,6 +90,7 @@ class PureImageViewer extends Component{
     }
 
     setImage(image){
+        console.log('setting image...', this.props.id);
         let id = this.props.id;
         this.props.actions.modifyBoard({id, data: {image: image}});
         this.props.actions.setMutable();
@@ -75,22 +104,10 @@ class PureImageViewer extends Component{
             currentWidth = this.props.width,
             currentHeight = this.props.height;
 
-        let ratio, newWidth, newHeight, minSize;
+        let aspectRatio = getAspectRatio(this.image, currentWidth, currentHeight);
 
-        if(this.image.naturalWidth < this.image.naturalHeight){
-            ratio = this.image.naturalHeight / this.image.naturalWidth;
-            newWidth = currentWidth;
-            newHeight = ratio * currentWidth;
-            minSize = [150, ratio * 150]
-        }
-        else{
-            ratio = this.image.naturalWidth / this.image.naturalHeight;
-            newWidth = ratio * currentHeight;
-            newHeight = currentHeight;
-            minSize = [ratio * 150, 150]
-        }
-        this.props.actions.modifyBoard({id,  width: newWidth, height: newHeight, maxSize: [Infinity, Infinity],
-            minSize: minSize, data: {ratio: true} });
+        this.props.actions.modifyBoard({id,  width: aspectRatio.width, height: aspectRatio.height,
+            maxSize: [Infinity, Infinity], minSize: aspectRatio.minSize, data: {ratio: true} });
         this.props.actions.setMutable();
         if(Meteor.user()) Meteor.call('boards.update', store.getState());
     }
@@ -105,13 +122,49 @@ class PureImageViewer extends Component{
     }
 
     compileMenu(context){
+
+        let self = this;
+
         let ratio = {
             condition: (data)=> typeof data !== 'undefined' && typeof data.image !== 'undefined' && data.image,
             icon: '/icons/ratio.svg',
             title: (data) => {if(data) return data.ratio ? 'unlock ratio' : 'lock ratio'},
             fun: (data)=> {if(data)  return data.ratio ? this.unlockAspectRatio() : this.lockAspectRatio()}
         };
-        return [ratio];
+
+        let rotate = {
+            condition: (data)=> typeof data !== 'undefined' && typeof data.image !== 'undefined' && data.image,
+            icon: '/icons/ratio.svg',
+            title: () => 'rotate',
+            fun: (data)=> {if(data) rotateImage(this.image, function(tempImage, image) {
+                self.setImage(tempImage);
+                let uploader = new Slingshot.Upload("userImageUploads");
+                uploader.send(image, function (error, downloadUrl) {
+                    if (error) {
+                        alert(error);
+                    }
+                    else {
+                        if(tempImage === self.image.src) self.setImage(downloadUrl);
+                    }
+                });
+            })}
+        };
+
+        let spotlight = {
+            condition: (data)=> typeof data !== 'undefined' && typeof data.image !== 'undefined' && data.image,
+            icon: '/icons/ratio.svg',
+            title: (data) => {if(data) return data.ratio ? 'unlock ratio' : 'lock ratio'},
+            fun: (data)=> {if(data)  return data.ratio ? this.unlockAspectRatio() : this.lockAspectRatio()}
+        };
+
+        let crop = {
+            condition: (data)=> typeof data !== 'undefined' && typeof data.image !== 'undefined' && data.image,
+            icon: '/icons/ratio.svg',
+            title: (data) => {if(data) return data.ratio ? 'unlock ratio' : 'lock ratio'},
+            fun: (data)=> {if(data)  return data.ratio ? this.unlockAspectRatio() : this.lockAspectRatio()}
+        };
+
+        return [ratio, rotate];
     }
 
     render(){
@@ -121,8 +174,8 @@ class PureImageViewer extends Component{
         return (
             <Core selected={this.props.selected}
                   focused={this.state.focused}
-                  menu={this.props.preview ? null : ()=>this.compileMenu()}
-                  minSize={[150, 150]}
+                  menu={() => this.compileMenu()}
+                  minSize={ this.props.minSize || [150, 150]}
                   resizeOpts={{lockAspectRatio: this.props.ratio}}
                   {...this.props}>
                 {connectDropTarget(
@@ -138,7 +191,9 @@ class PureImageViewer extends Component{
                                 height: '100%', width: '100%', textAlign: 'center', outline: 'none'}}
                                  ref={(preview) => this.preview = preview}>
                                 {this.props.imageData ?
-                                    <img ref={(image) => this.image = image} src={this.props.imageData} style={{height: '100%', width: '100%', outline: 'none', pointerEvents: 'none'}}/>
+                                    <img ref={(image) => this.image = image} src={this.props.imageData}
+                                         crossOrigin={'anonymous'}
+                                         style={{height: '100%', width: '100%', outline: 'none', pointerEvents: 'none'}}/>
                                     : <label style={{color: 'gray'}}>Drag or Paste an Image here</label>}
                             </div>
                         </div>
@@ -156,6 +211,8 @@ function selector(dispatch) {
 
         nextState = nextState.undoable.present;
 
+        let widget = nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id);
+
         const nextResult = {
             actions: actions,
             selected: function(){
@@ -169,17 +226,16 @@ function selector(dispatch) {
                 }
                 else return false;
             }(),
+            minSize: widget ? widget.minSize : null,
             imageData: function() {
-                let viewer = nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id);
-                if(viewer && viewer.data) {
-                    return viewer.data.image;
+                if(widget && widget.data) {
+                    return widget.data.image;
                 }
                 else return null;
             }(),
             ratio: function(){
-                let viewer = nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id);
-                if(viewer && viewer.data) {
-                    return viewer.data.ratio;
+                if(widget && widget.data) {
+                    return widget.data.ratio;
                 }
                 else return null;
             }(),

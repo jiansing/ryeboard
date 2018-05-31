@@ -135,7 +135,7 @@ class PureTextEditor extends Component{
         return(
             <Core selected={this.props.selected}
                   focused={this.state.focused}
-                  menu={this.props.preview ? null : ()=>this.compileMenu()}
+                  menu={()=>this.compileMenu()}
                   {...this.props}>
                 <div style={{position: 'absolute', height: '100%', width: '100%', zIndex: this.state.focused ? -1 : 3}}
                      onClick={(event)=> {
@@ -207,7 +207,7 @@ function selector(dispatch) {
             ...nextOwnProps
         };
 
-        nextResult.shouldUpdate = !equals(nextResult.savedEditorState, result.savedEditorState);
+        nextResult.shouldUpdate = true;
 
         if(!equals(nextResult, result)){
             result = nextResult;

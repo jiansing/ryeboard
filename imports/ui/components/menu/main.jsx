@@ -53,8 +53,6 @@ class PureMenu extends Component {
 
     render() {
 
-        console.log(this.props.currentMenu);
-
         return (
             <div style={{background: '#F2F2F2', marginTop: '50px', height: 'calc(100vh - 50px)', display: 'flex', position: 'fixed', top: 0,
                 left: 0, width: '75px', zIndex: 4, boxShadow: '0 1px 1px 0 rgba(0, 0, 0, 0.15), 0 0px 1px 0 rgba(0, 0, 0, 0.15)'}}>
@@ -85,11 +83,12 @@ function selector(dispatch) {
         const nextResult = {
             selection: selection,
             currentMenu: selection ? function(){
-                if(Array.isArray(selection) || nextState.boardLogic.dragging) {
+                if(Array.isArray(selection)) {
                     return null;
                 }
                 let menu = selection && selection.data ?
                     selection.data.menu : null;
+
                 return menu ? menu() : null;
             }() : null,
             currentContext: selection ? function(){

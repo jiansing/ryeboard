@@ -20,12 +20,12 @@ const widgetSource = {
         let topOffset = document.getElementById('preview-' + props.type).parentElement.offsetTop,
             leftOffset = document.getElementById('preview-' + props.type).parentElement.offsetLeft;
 
-        console.log('top offset:', topOffset, '\nleftOffset:', leftOffset, '\ntop:', top, '\nleft:',left);
+        //console.log('top offset:', topOffset, '\nleftOffset:', leftOffset, '\ntop:', top, '\nleft:',left);
 
         top += topOffset;
         left -= 75 - leftOffset;
 
-        console.log('top:', top, '\nleft:', left);
+        //console.log('top:', top, '\nleft:', left);
 
         return { type, data, left, top, width, height, newWidget }
     },
