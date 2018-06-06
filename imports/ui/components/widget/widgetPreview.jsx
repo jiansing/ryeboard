@@ -25,8 +25,6 @@ const widgetSource = {
         top += topOffset;
         left -= 75 - leftOffset;
 
-        //console.log('top:', top, '\nleft:', left);
-
         return { type, data, left, top, width, height, newWidget }
     },
 };

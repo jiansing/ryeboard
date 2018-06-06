@@ -26,7 +26,7 @@ export default class Widget extends Component {
                 <TextEditor {...this.props}/>
             )
             case 'image' : return(
-                <ImageViewer {...this.props}/>
+                <ImageViewer minSize={[150, 150]}{...this.props}/>
             )
         }
     }

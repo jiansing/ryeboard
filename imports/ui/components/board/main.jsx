@@ -233,6 +233,7 @@ class PureBoard extends Component {
     }
 
     resizeWidget(id, height, width) {
+
         if(!id && !height && !width) this.setState({resizing: true});
         else{
             this.props.actions.modifyBoard({id, height, width});
@@ -243,6 +244,7 @@ class PureBoard extends Component {
     }
 
     deselectAllWidgets(event){
+        console.log('deselect widget');
         if(!event.shiftKey){
             this.props.actions.deselectAllWidgetFromBoard();
         }
@@ -263,7 +265,7 @@ class PureBoard extends Component {
 
         return connectDropTarget(
             <div id='board-container'
-                 onClickCapture={(event)=> this.deselectAllWidgets(event)}
+                 onClick={(event)=> this.deselectAllWidgets(event)}
                  style={{marginTop: '50px', marginLeft: '75px', width: 'calc(100vw - 75px)', height: 'calc(100vh - 50px)', overflow: 'scroll'}}>
                 <DragLayer />
                 <div  id='board' ref={(container) => this.container= container}>

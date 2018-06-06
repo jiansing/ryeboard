@@ -7,7 +7,7 @@ import * as types from '../constants/actionTypes';
 const DEFAULT_STATE = {
     selected: null,
     data: null,
-    dragging: null
+    dragging: null,
 };
 
 function selection(state = DEFAULT_STATE, action) {
@@ -46,6 +46,7 @@ function selection(state = DEFAULT_STATE, action) {
         case types.BOARD_DESELECT_ALL_WIDGET: {
             let newState = Object.assign(state);
             newState.selected = null;
+            newState.data = null;
             return newState;
         }
 
@@ -54,10 +55,14 @@ function selection(state = DEFAULT_STATE, action) {
             if(Array.isArray(newState.selected)){
                 let deselectedIndex = newState.selected.findIndex((element)=> element.id === action.value);
                 newState.selected.splice(deselectedIndex, 1);
-                if(newState.selected.length === 0) newState.selected = null;
+                if(newState.selected.length === 0) {
+                    newState.selected = null;
+                    newState.data = null;
+                }
             }
             else{
                 newState.selected = null;
+                newState.data = null;
             }
 
             return newState;
@@ -79,6 +84,7 @@ function selection(state = DEFAULT_STATE, action) {
         case types.BOARD_REMOVE: {
             let newState = Object.assign(state);
             newState.selected = null;
+            newState.data = null;
             return newState;
         }
 

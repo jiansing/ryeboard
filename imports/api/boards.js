@@ -26,6 +26,7 @@ Meteor.methods({
                 username: Meteor.users.findOne(this.userId).username,
             });
         }
+
         else{
             Boards.update({owner: this.userId}, {
                 $set: {state: parsedState}

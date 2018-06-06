@@ -16,8 +16,9 @@ import store from '/imports/redux/store';
 import getAspectRatio from './tools/getAspectRatio';
 import ReactCrop from 'react-image-crop';
 import rotateImage from './tools/rotate';
+import EditCanvas from './tools/editCanvas';
 
-function uploadFileToS3(file, setImage){
+function processImageData(file, setImage){
     file = file[0];
 
     if(Meteor.user()){
@@ -32,7 +33,7 @@ function uploadFileToS3(file, setImage){
         });
     }
     else{
-        let data  = URL.createObjectURL(file.files[0]);
+        let data  = URL.createObjectURL(file);
         setImage(data);
     }
 }
@@ -43,13 +44,13 @@ const ImageTarget = {
         let item = monitor.getItem();
         if(item.files){
 
-            uploadFileToS3(monitor.getItem().files, (image)=> component.setImage(image));
+            processImageData(monitor.getItem().files, (image)=> component.setImage(image));
 
         }
         if(item.urls){
             let data  = item.urls[0];
 
-            isUrlImage(data, ()=>  component.setImage(data), 10000);
+            isUrlImage(data, () =>  component.setImage(data), 10000);
         }
     },
 };
@@ -119,29 +120,44 @@ class PureImageViewer extends Component{
         let rotate = {
             condition: (data)=> typeof data !== 'undefined' && typeof data.image !== 'undefined' && data.image,
             icon: '/icons/ratio.svg',
-            title: () => 'rotate',
+            title: () => 'Edit',
             fun: (context, data)=> {
-                console.log('checking data:', data);
-                if(data == null || !data.rotating) rotateImage(this.image, function(tempImage, image) {
 
-                    console.log('setting rotate to true');
-                self.props.actions.setSelectedWidgetData({rotating: true});
+                self.props.actions.setSelectedWidgetData({edit: true});
 
-                self.setImage(tempImage);
-                let uploader = new Slingshot.Upload("userImageUploads");
-                uploader.send(image, function (error, downloadUrl) {
-                    if (error) {
-                        alert(error);
-                    }
-                    else {
-                        if(tempImage === self.image.src) {
-                            console.log('setting rotate to false');
-                            self.props.actions.setSelectedWidgetData({rotating: false});
-                            self.setImage(downloadUrl);
-                        }
-                    }
-                });
-            })}
+                /*let rotation = (self.props.data.rotation || 0) + 90;
+
+                rotation = rotation >= 360 && 360 % rotation === 0 ? 0 : rotation;
+
+                console.log(rotation);
+
+                let inverse = false;
+
+                if(rotation === 90 || rotation === 270){
+                    console.log("r1")
+                    inverse = false;
+                }
+                else if(rotation === 180 || rotation === 0){
+                    console.log("r2")
+                   inverse = true;
+                }
+
+                self.props.actions.modifyBoard({id: self.props.id, width: self.props.height, height: self.props.width,
+                    data: {rotation, inverse}});
+
+                if(data == null || !data.rotating) rotateImage(this.image, function(tempImage, imageFile) {
+
+                    self.props.actions.setSelectedWidgetData({rotating: true});
+
+                    self.setImage(tempImage, false);
+
+                    if(Meteor.user()) processImageData([imageFile], (image)=>{
+                        self.props.actions.setSelectedWidgetData({rotating: false});
+                        self.setImage(image)
+                    });
+                    else self.props.actions.setSelectedWidgetData({rotating: false});
+
+                })*/}
         };
 
         let spotlight = {
@@ -165,12 +181,71 @@ class PureImageViewer extends Component{
             fun: (data)=> this.input.click()
         };
 
-        return [ratio, rotate, uploadFile];
+        return [ratio, uploadFile, rotate];
+    }
+
+    uploadData(url, data){
+
+        let self = this;
+
+        let blobData = dataURItoBlob(data);
+
+        let nameParts = url.split('/'),
+            name = nameParts[nameParts.length-1];
+
+        let dateParts = name.split(/[\s-]+/),
+            date = dateParts[0];
+
+        blobData.name = decodeURI(name.replace(date, '').replace('-', ''));
+        blobData.lastModifiedDate = new Date();
+
+        if(Meteor.user()) processImageData([blobData], (image)=>{
+            console.log('uploaded and setting:', image);
+            self.setImage(image)
+        });
+        else self.props.actions.setSelectedWidgetData({rotating: false});
+
+        function dataURItoBlob(dataURI) {
+            let binary = atob(dataURI.split(',')[1]);
+            let array = [];
+            for(let i = 0; i < binary.length; i++) {
+                array.push(binary.charCodeAt(i));
+            }
+            return new Blob([new Uint8Array(array)], {type: 'image/png'});
+        }
+    }
+
+    selectContent(){
+
+        if(this.props.imageData){
+            return(
+                <div style={{width: '100%', height: '100%'}}>
+                    <img ref={(image) => this.image = image}
+                         crossOrigin={'anonymous'}
+                         src={this.props.imageData}
+                         style={{height: '100%', width: '100%',
+                             outline: 'none', pointerEvents: 'none'}}/>
+                    {this.props.menuData && this.props.menuData.edit ?
+                        <EditCanvas image={this.props.imageData}
+                                    save={(url, data)=> this.uploadData(url, data)}
+                                    onClose={() => this.props.actions.setSelectedWidgetData({edit: false})}
+                                    width={this.props.width}
+                                    height={this.props.height}/> : ''}
+                </div>
+            )
+        }
+        else{
+            return(
+                <label style={{color: 'gray'}}>Drag or Upload an Image here</label>
+            )
+        }
     }
 
     render(){
 
         const { connectDropTarget } = this.props;
+
+        const Content = this.selectContent();
 
         return (
             <Core selected={this.props.selected}
@@ -182,27 +257,22 @@ class PureImageViewer extends Component{
                 {connectDropTarget(
                     <div style={{height: '100%', width: '100%', background: 'white'}}
                          className={this.props.isOver ? 'dustbin open' : 'dustbin'}>
-                        <div style={{position: 'absolute', height: '100%', width: '100%', zIndex: this.state.focused ? -1 : 3}}
+                        <div style={{position: 'absolute', height: '100%', width: '100%', zIndex: this.state.focused ? -1 : -1}}
                              onClick={(event)=> {
+                                 console.log('click consumption on focus filler')
                                  this.preview.focus();
-                                 event.stopPropagation();
                              }}/>
                         <div style={{width: '100%', height: '100%', outline: 'none'}}>
                             <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center',
                                 height: '100%', width: '100%', textAlign: 'center', outline: 'none'}}
                                  ref={(preview) => this.preview = preview}>
-                                {this.props.imageData ?
-                                    <img ref={(image) => this.image = image}
-                                         crossOrigin={'anonymous'}
-                                         src={this.props.imageData}
-                                         style={{height: '100%', width: '100%', outline: 'none', pointerEvents: 'none'}}/>
-                                    : <label style={{color: 'gray'}}>Drag or Paste an Image here</label>}
+                                {Content}
                             </div>
                         </div>
                     </div>
                 )}
                 <input style={{height: "0px", width: "0px", display: 'none'}} type="file" id="input" accept="image/*"
-                       onChange = {(event)=> uploadFileToS3(event.target.files, (image)=>this.setImage(image))} ref={(c)=> this.input = c}/>
+                       onChange = {(event)=> processImageData(event.target.files, (image)=>this.setImage(image))} ref={(c)=> this.input = c}/>
             </Core>
         )
     }
@@ -217,19 +287,21 @@ function selector(dispatch) {
 
         let widget = nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id);
 
+        let selected = function(){
+            let selection = nextState.boardLogic.selected;
+
+            if(Array.isArray(selection)){
+                return selection.findIndex((elem)=> elem.id === nextOwnProps.id) !== -1
+            }
+            else if(selection){
+                return selection.id === nextOwnProps.id;
+            }
+            else return false;
+        }();
+
         const nextResult = {
             actions: actions,
-            selected: function(){
-                let selection = nextState.boardLogic.selected;
-
-                if(Array.isArray(selection)){
-                    return selection.findIndex((elem)=> elem.id === nextOwnProps.id) !== -1
-                }
-                else if(selection){
-                    return selection.id === nextOwnProps.id;
-                }
-                else return false;
-            }(),
+            selected: selected,
             minSize: widget ? widget.minSize : null,
             imageData: function() {
                 if(widget && widget.data) {
@@ -237,6 +309,12 @@ function selector(dispatch) {
                 }
                 else return null;
             }(),
+            menuData: selected ? function(){
+                if(Array.isArray(nextState.boardLogic.selected)) {
+                    return null;
+                }
+                return nextState.boardLogic.data;
+            }() : null,
             ratio: function(){
                 if(widget && widget.data) {
                     return widget.data.ratio;
