@@ -107,32 +107,6 @@ function collect(connect, monitor) {
     };
 }
 
-const style = {
-    position: 'relative',
-    height: '2000px',
-    width: '2000px',
-    backgroundColor: '#D9D3CD',
-    backgroundImage: 'url("/grid.svg")',
-    backgroundRepeat: 'repeat',
-    backgroundSize: '15px 15px',
-    overflow: 'hidden',
-    cursor: 'default'
-};
-
-function getStyle(props){
-    return{
-        position: 'relative',
-        height: '2000px',
-        width: '2000px',
-        backgroundColor: '#D9D3CD',
-        backgroundImage: props.isDragging ? 'url("/grid.svg")' : '',
-        backgroundRepeat: 'repeat',
-        backgroundSize: '15px 15px',
-        overflow: 'hidden',
-        cursor: 'default'
-    }
-}
-
 class PureBoard extends Component {
 
     constructor(props) {

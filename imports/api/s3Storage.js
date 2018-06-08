@@ -29,7 +29,8 @@ Slingshot.createDirective("userImageUploads", Slingshot.S3Storage, {
     },
     key: function (file) {
         console.log("FILE:", file);
-        return 'userData/' + Meteor.userId() + "/" + Date.now() + "-" + file.name;
+        let id = (Date.now().toString(36) + Math.random().toString(36).substr(2, 5)).toUpperCase()
+        return 'userData/' + Meteor.userId() + "/" + id;
     }
 });
 
@@ -66,11 +67,7 @@ Meteor.methods({
                     object.Contents.forEach(function(elem){
 
                         let key = elem['Key'];
-                        //Extract date from image name
-                        /*scores.push({
-                            url: "https://s3.ap-northeast-2.amazonaws.com/ryeboard/userData/" + key,
-                            date: key.replace('scores/', '').split('_')[1].replace('.jpg', '')
-                        });*/
+
                         let queDelete = usedImages.findIndex((elem) =>{
                             return elem === 'https://s3.ap-northeast-2.amazonaws.com/ryeboard/' + key;
                         });

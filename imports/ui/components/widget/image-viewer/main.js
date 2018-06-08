@@ -121,43 +121,7 @@ class PureImageViewer extends Component{
             condition: (data)=> typeof data !== 'undefined' && typeof data.image !== 'undefined' && data.image,
             icon: '/icons/ratio.svg',
             title: () => 'Edit',
-            fun: (context, data)=> {
-
-                self.props.actions.setSelectedWidgetData({edit: true});
-
-                /*let rotation = (self.props.data.rotation || 0) + 90;
-
-                rotation = rotation >= 360 && 360 % rotation === 0 ? 0 : rotation;
-
-                console.log(rotation);
-
-                let inverse = false;
-
-                if(rotation === 90 || rotation === 270){
-                    console.log("r1")
-                    inverse = false;
-                }
-                else if(rotation === 180 || rotation === 0){
-                    console.log("r2")
-                   inverse = true;
-                }
-
-                self.props.actions.modifyBoard({id: self.props.id, width: self.props.height, height: self.props.width,
-                    data: {rotation, inverse}});
-
-                if(data == null || !data.rotating) rotateImage(this.image, function(tempImage, imageFile) {
-
-                    self.props.actions.setSelectedWidgetData({rotating: true});
-
-                    self.setImage(tempImage, false);
-
-                    if(Meteor.user()) processImageData([imageFile], (image)=>{
-                        self.props.actions.setSelectedWidgetData({rotating: false});
-                        self.setImage(image)
-                    });
-                    else self.props.actions.setSelectedWidgetData({rotating: false});
-
-                })*/}
+            fun: (context, data)=> self.props.actions.setSelectedWidgetData({edit: true})
         };
 
         let spotlight = {
@@ -190,20 +154,14 @@ class PureImageViewer extends Component{
 
         let blobData = dataURItoBlob(data);
 
-        let nameParts = url.split('/'),
-            name = nameParts[nameParts.length-1];
-
-        let dateParts = name.split(/[\s-]+/),
-            date = dateParts[0];
-
-        blobData.name = decodeURI(name.replace(date, '').replace('-', ''));
+        blobData.name = 'raw';
         blobData.lastModifiedDate = new Date();
 
         if(Meteor.user()) processImageData([blobData], (image)=>{
             console.log('uploaded and setting:', image);
             self.setImage(image)
         });
-        else self.props.actions.setSelectedWidgetData({rotating: false});
+        else self.setImage(data);
 
         function dataURItoBlob(dataURI) {
             let binary = atob(dataURI.split(',')[1]);
@@ -221,7 +179,7 @@ class PureImageViewer extends Component{
             return(
                 <div style={{width: '100%', height: '100%'}}>
                     <img ref={(image) => this.image = image}
-                         crossOrigin={'anonymous'}
+                         crossOrigin={null}
                          src={this.props.imageData}
                          style={{height: '100%', width: '100%',
                              outline: 'none', pointerEvents: 'none'}}/>
