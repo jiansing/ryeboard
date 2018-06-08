@@ -26,7 +26,7 @@ class App extends React.Component {
     }
 
     saveImage(){
-        this.props.save(this.props.image, this.cropper.getCroppedCanvas().toDataURL("image/png", 1));
+        this.props.save(this.cropper.getCroppedCanvas().toDataURL("image/png", 1));
         this.closeModal();
     }
 

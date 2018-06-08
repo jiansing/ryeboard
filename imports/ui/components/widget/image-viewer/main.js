@@ -148,7 +148,7 @@ class PureImageViewer extends Component{
         return [ratio, uploadFile, rotate];
     }
 
-    uploadData(url, data){
+    uploadData(data){
 
         let self = this;
 
@@ -185,7 +185,7 @@ class PureImageViewer extends Component{
                              outline: 'none', pointerEvents: 'none'}}/>
                     {this.props.menuData && this.props.menuData.edit ?
                         <EditCanvas image={this.props.imageData}
-                                    save={(url, data)=> this.uploadData(url, data)}
+                                    save={(data)=> this.uploadData(data)}
                                     onClose={() => this.props.actions.setSelectedWidgetData({edit: false})}
                                     width={this.props.width}
                                     height={this.props.height}/> : ''}
