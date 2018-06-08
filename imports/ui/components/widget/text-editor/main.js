@@ -107,21 +107,21 @@ class PureTextEditor extends Component{
     compileMenu(){
         let bold = {
                 condition: ()=> true,
-                selected: (data) => data.style ? data.style[0] : false,
+                selected: (context) => context.style ? context.style[0] : false,
                 icon: '/icons/bold-text.svg',
                 title: ()=> 'bold',
                 fun: (test)=> this.onBoldClick(test)
             },
             italic = {
                 condition: ()=> true,
-                selected: (data) => data.style ? data.style[1] : false,
+                selected: (context) => context.style ? context.style[1] : false,
                 icon: '/icons/italic-text.svg',
                 title: () => 'italic',
                 fun: ()=> this.onItalicClick()
             },
             underline = {
                 condition: ()=> true,
-                selected: (data) => data.style ? data.style[2] : false,
+                selected: (context) => context.style ? context.style[2] : false,
                 icon: '/icons/underline-text.svg',
                 title: () => 'underline',
                 fun: ()=> this.onUnderlineClick()
@@ -135,7 +135,7 @@ class PureTextEditor extends Component{
         return(
             <Core selected={this.props.selected}
                   focused={this.state.focused}
-                  menu={this.props.preview ? null : ()=>this.compileMenu()}
+                  menu={()=>this.compileMenu()}
                   {...this.props}>
                 <div style={{position: 'absolute', height: '100%', width: '100%', zIndex: this.state.focused ? -1 : 3}}
                      onClick={(event)=> {
@@ -207,7 +207,7 @@ function selector(dispatch) {
             ...nextOwnProps
         };
 
-        nextResult.shouldUpdate = !equals(nextResult.savedEditorState, result.savedEditorState);
+        nextResult.shouldUpdate = true;
 
         if(!equals(nextResult, result)){
             result = nextResult;

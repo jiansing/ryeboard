@@ -26,6 +26,7 @@ Meteor.methods({
                 username: Meteor.users.findOne(this.userId).username,
             });
         }
+
         else{
             Boards.update({owner: this.userId}, {
                 $set: {state: parsedState}
@@ -33,14 +34,6 @@ Meteor.methods({
         }
 
 
-    },
-
-    'boards.initialize'(){
-        if (this.userId) {
-            //Todo: Create function to clean-up unused images on S3
-            //let board = Boards.findOne({owner: this.userId});
-            //console.log(board);
-        }
     },
 
     async 'boards.find'() {

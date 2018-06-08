@@ -21,11 +21,13 @@ const widgetSource = {
         document.activeElement.blur();
 
         if(selectedWidgets === null) {
-            props.handleSelect(props.id, {menu: props.dragging ? null : props.menu});
+            props.handleSelect(props.id, {menu: props.menu});
+            console.log('single drag with menu:', props.menu);
             selectedWidgets = [{id, type, left, top, width, height}];
         }
         if(selectedWidgets.findIndex((elem)=>elem.id===id) === -1){
             props.actions.deselectAllWidgetFromBoard();
+            props.handleSelect(props.id, {menu: props.menu});
             selectedWidgets = [{id, type, left, top, width, height}];
         }
 
@@ -65,11 +67,11 @@ function getStyles(props) {
         opacity: isDragging || dragging ? 0 : 1,
         height: isDragging  || dragging ? 0 : '',
         zIndex: 1,
-        outline: selected ? '2px dodgerBlue solid' : '2px transparent solid',
+        outline: selected ? '3px dodgerBlue solid' : '3px transparent solid',
         boxShadow: preview ?
             '0 2px 2px 0 rgba(0, 0, 0, 0.25), 0 0px 2px 0 rgba(0, 0, 0, 0.25)' :
             '0 1px 1px 0 rgba(0, 0, 0, 0.15), 0 0px 1px 0 rgba(0, 0, 0, 0.15)',
-        background: 'white',
+        background: 'white'
     }
 }
 
@@ -94,6 +96,7 @@ class PureWidget extends Component {
     }
 
     saveResize(event, data){
+
         let {width, height} = data.size;
 
         let widthOffset = width % 15,
@@ -109,11 +112,12 @@ class PureWidget extends Component {
     }
 
     select(event){
-        if(event.shiftKey && !this.props.selected) {
-            this.props.handleMultiSelect(this.props.id, {menu: this.props.dragging ? null : this.props.menu});
+
+        if(event.shiftKey) {
+            this.props.handleMultiSelect(this.props.id, {menu: this.props.menu});
         }
         else {
-            this.props.handleSelect(this.props.id, {menu: this.props.dragging ? null : this.props.menu});
+            this.props.handleSelect(this.props.id, {menu: this.props.menu});
         }
     }
 
@@ -126,6 +130,7 @@ class PureWidget extends Component {
                 <div>
                     <ResizableBox width={this.props.width || 300} height={this.props.height || 150}
                                   minConstraints={this.props.minSize || [90, 60]}
+                                  onClick={(event) => event.stopPropagation()}
                                   onClickCapture={(event)=> this.select(event)}
                                   maxConstraints={this.props.maxSize || [Infinity, Infinity]}
                                   onResizeStart={(event)=>this.preventDndOnResize(event)}

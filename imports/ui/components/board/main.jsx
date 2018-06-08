@@ -107,32 +107,6 @@ function collect(connect, monitor) {
     };
 }
 
-const style = {
-    position: 'relative',
-    height: '2000px',
-    width: '2000px',
-    backgroundColor: '#D9D3CD',
-    backgroundImage: 'url("/grid.svg")',
-    backgroundRepeat: 'repeat',
-    backgroundSize: '15px 15px',
-    overflow: 'hidden',
-    cursor: 'default'
-};
-
-function getStyle(props){
-    return{
-        position: 'relative',
-        height: '2000px',
-        width: '2000px',
-        backgroundColor: '#D9D3CD',
-        backgroundImage: props.isDragging ? 'url("/grid.svg")' : '',
-        backgroundRepeat: 'repeat',
-        backgroundSize: '15px 15px',
-        overflow: 'hidden',
-        cursor: 'default'
-    }
-}
-
 class PureBoard extends Component {
 
     constructor(props) {
@@ -142,6 +116,7 @@ class PureBoard extends Component {
             resizing: false,
         };
         let self = this;
+
         window.addEventListener('keydown', function(event){
             if(document.activeElement === document.body){
 
@@ -175,7 +150,11 @@ class PureBoard extends Component {
                             }
                             else selected = selected.id;
 
-                            if(selected){
+
+                            console.log('delete:', selected);
+
+                            if(selected != null){
+                                console.log('removing');
                                 self.props.actions.removeFromBoard(selected);
                                 self.props.actions.setMutable();
                                 if(Meteor.user()) Meteor.call('boards.update', store.getState());
@@ -196,6 +175,7 @@ class PureBoard extends Component {
 
     multiSelectWidget(id, data) {
         let selection = this.props.selectedWidgets;
+        console.log('multi select test:', selection);
         if(Array.isArray(selection) && selection.findIndex((elem)=>elem.id === id)!==-1){
             this.props.actions.deselectWidgetFromBoard(id, data);
         }
@@ -227,6 +207,7 @@ class PureBoard extends Component {
     }
 
     resizeWidget(id, height, width) {
+
         if(!id && !height && !width) this.setState({resizing: true});
         else{
             this.props.actions.modifyBoard({id, height, width});
@@ -237,6 +218,7 @@ class PureBoard extends Component {
     }
 
     deselectAllWidgets(event){
+        console.log('deselect widget');
         if(!event.shiftKey){
             this.props.actions.deselectAllWidgetFromBoard();
         }
@@ -257,7 +239,7 @@ class PureBoard extends Component {
 
         return connectDropTarget(
             <div id='board-container'
-                 onClickCapture={(event)=> this.deselectAllWidgets(event)}
+                 onClick={(event)=> this.deselectAllWidgets(event)}
                  style={{marginTop: '50px', marginLeft: '75px', width: 'calc(100vw - 75px)', height: 'calc(100vh - 50px)', overflow: 'scroll'}}>
                 <DragLayer />
                 <div  id='board' ref={(container) => this.container= container}>

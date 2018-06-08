@@ -31,6 +31,14 @@ export const modifyBoard = (value, preventSync) => {
     }
 };
 
+export const setSelectedWidgetData = (data) => {
+
+    return {
+        type: types.BOARD_SET_SELECTED_WIDGET_DATA,
+        value: data
+    }
+};
+
 export const selectWidgetFromBoard = (id, data) => {
 
     return {

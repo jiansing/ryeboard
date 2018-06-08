@@ -10,7 +10,6 @@ class PureRoutes extends React.Component{
         super(props);
     }
     render(){
-        console.log('routing');
 
         return(
             <Switch>
