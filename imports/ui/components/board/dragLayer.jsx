@@ -3,16 +3,17 @@ import { DragLayer } from 'react-dnd'
 import Widget from '../widget/main';
 
 function getItemStyles(props) {
-    const { initialOffset, currentOffset } = props;
+    const { initialOffset, currentOffset, zoomValue } = props;
     if (!initialOffset || !currentOffset) {
         return {
             display: 'none',
         }
     }
 
+
     let { x, y } = currentOffset;
 
-    const transform = `translate(${x}px, ${y}px)`;
+    const transform = `translate(${x / zoomValue}px, ${y / zoomValue}px)`;
     return {
         transform,
         WebkitTransform: transform,

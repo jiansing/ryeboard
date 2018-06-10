@@ -21,16 +21,18 @@ const widgetTarget = {
             return
         }
 
-        const item = monitor.getItem();
+        const item = monitor.getItem(),
+              zoomValue = props.zoom ? props.zoom.value : 1;;
 
         if(Array.isArray(item.selectedWidgets)){
+
             const delta = monitor.getDifferenceFromInitialOffset();
 
             let widgetArray = []
 
             item.selectedWidgets.forEach(function(selection){
-                let left = selection.left + delta.x;
-                let top = selection.top + delta.y;
+                let left = selection.left + delta.x /zoomValue;
+                let top = selection.top + delta.y / zoomValue;
 
                 [left, top] = snapToGrid(left, top);
 
@@ -86,7 +88,9 @@ const widgetTarget = {
                 let left = item.left + delta.x;
                 let top = item.top + delta.y;
 
-                [left, top] = snapToGrid(left, top);
+                console.log('before snap:', left, top);
+                [left, top] = snapToGrid(left / zoomValue, top / zoomValue);
+                console.log('after snap:', left, top);
 
                 if(item.newWidget) {
                     delete item.newWidget;
@@ -224,6 +228,66 @@ class PureBoard extends Component {
         }
     }
 
+    componentDidUpdate(){
+
+        if(this.props.zoom.scroll){
+            let self = this;
+            setTimeout(function(){
+                document.getElementById('board-container').scrollTop = self.props.zoom.scroll.scrollTop;
+                document.getElementById('board-container').scrollLeft = self.props.zoom.scroll.scrollLeft;
+
+                //scrollToTop(document.getElementById('board-container'), self.props.zoom.scroll.scrollTop, 250);
+                //scrollToLeft(document.getElementById('board-container'), self.props.zoom.scroll.scrollLeft, 250);
+
+                self.props.actions.modifySettingsParam({zoom: {scroll: null}});
+            }, 0);
+
+            function scrollToTop(element, to, duration) {
+                let start = element.scrollTop,
+                    change = to - start,
+                    currentTime = 0,
+                    increment = 25;
+
+                let animateScroll = function(){
+                    currentTime += increment;
+                    let val = Math.easeInOutQuad(currentTime, start, change, duration);
+                    element.scrollTop = val;
+                    if(currentTime < duration) {
+                        setTimeout(animateScroll, increment);
+                    }
+                };
+                animateScroll();
+            }
+
+            function scrollToLeft(element, to, duration) {
+                let start = element.scrollLeft,
+                    change = to - start,
+                    currentTime = 0,
+                    increment = 25;
+
+                let animateScroll = function(){
+                    currentTime += increment;
+                    let val = Math.easeInOutQuad(currentTime, start, change, duration);
+                    element.scrollLeft = val;
+                    if(currentTime < duration) {
+                        setTimeout(animateScroll, increment);
+                    }
+                };
+                animateScroll();
+            }
+            
+            //t = current time
+            //b = start value
+            //c = change in value
+            //d = duration
+            Math.easeInOutQuad = function (t, b, c, d) {
+                t /= d/2;
+                if (t < 1) return c/2*t*t + b;
+                t--;
+                return -c/2 * (t*(t-2) - 1) + b;
+            };
+        }
+    }
 
     renderWidget(item) {
         return <Widget key={item.id} id={item.id} type={item.type}
@@ -238,16 +302,17 @@ class PureBoard extends Component {
         const widgets = this.props.widgets;
 
         let zoomScale = this.props.zoom ? this.props.zoom.scale : '',
-            zoomOrigin = this.props.zoom ? this.props.zoom.origin : '';
+            zoomValue = this.props.zoom ? this.props.zoom.value : 1;
 
         return connectDropTarget(
             <div id='board-container'
+                 onScroll={(event)=> console.log('l:', document.getElementById('board-container').scrollLeft, 't:', document.getElementById('board-container').scrollTop)}
                  onClick={(event)=> this.deselectAllWidgets(event)}
                  style={{marginTop: '50px', marginLeft: '75px', width: 'calc(100vw - 75px)',
                      height: 'calc(100vh - 50px)', overflow: 'scroll'}}>
-                <DragLayer zoomScale={zoomScale} zoomOrigin={zoomOrigin}/>
+                <DragLayer zoomValue={zoomValue} zoomScale={zoomScale}/>
                 <div  id='board' ref={(container) => this.container= container}
-                      style={{transform: zoomScale, transformOrigin: '0 0'}}>
+                      style={{transform: zoomScale + ' translate3d(0px,0px,0px)', transformOrigin: '0 0'}}>
                     <div className={this.props.isDragging || this.state.resizing ? 'grid show' : 'grid hide'}
                          style={{width: '100%', height: '100%', position: 'absolute'}} />
                     {widgets.map(widget => this.renderWidget(widget))}
@@ -266,50 +331,110 @@ class FloatingMenu extends React.Component{
 
     zoomOut(){
         let zoom = this.props.zoom ? this.props.zoom.value : 1;
-        if(zoom > .25) zoom -= .25;
+        if(zoom === 1.5) zoom = 1.25;
+        else if(zoom === 1.25) zoom = 1;
+        else if(zoom === 1) zoom = .75;
+        else if(zoom === .75) zoom = .6;
+        else if(zoom === .6) zoom = .5;
+        else return;
 
         let scale = 'scale(' + zoom + ', ' + zoom + ')';
 
         let top = document.getElementById('board-container').pageYOffset ||
-            document.getElementById('board-container').scrollTop ||
             document.getElementById('board-container').scrollTop || 0,
             left = document.getElementById('board-container').pageXOffset ||
-                document.getElementById('board-container').scrollLeft ||
                 document.getElementById('board-container').scrollLeft || 0,
             width = document.getElementById('board-container').scrollWidth,
-            height = document.getElementById('board-container').scrollHeight;
+            height = document.getElementById('board-container').scrollHeight,
+            cWidth = document.getElementById('board-container').clientWidth,
+            cHeight = document.getElementById('board-container').clientHeight;
 
-        let origin = left / 30 + '% ' + top / 30 + '%';
+        let vPercent = top / (height - cHeight) || 0;
+        let hPercent = left / (width - cWidth) || 0;
 
-        this.props.actions.modifySettingsParam({zoom: {value: zoom, scale, origin}});
-        console.log('zooming:', zoom);
+        console.log('zoom:', zoom);
+        console.log('v percentage:', vPercent, 'top:', top, 'height:', height, 'cHeight:', cHeight);
+        console.log('h percentage:', hPercent, 'left:', left, 'width:', width, 'cWidth:', cWidth);
+
+        let scrollTop = vPercent * (5000 * zoom - cHeight);
+        let scrollLeft = hPercent  * (5000 * zoom- cWidth);
+
+        console.log('scroll zoom out:', scrollLeft, scrollTop);
+
+        this.props.actions.modifySettingsParam({zoom: {value: zoom, scale, scroll: {scrollTop, scrollLeft}}});
     }
 
     zoomIn(){
+        console.log('zoom prop:', this.props.zoom);
         let zoom = this.props.zoom ? this.props.zoom.value : 1;
-        if(zoom < 1.75) zoom += .25;
+        if(zoom === .5) zoom = .6;
+        else if(zoom === .6) zoom = .75;
+        else if(zoom === .75) zoom = 1;
+        else if(zoom === 1) zoom = 1.25;
+        else if(zoom === 1.25) zoom = 1.5;
+        else return;
 
         let scale = 'scale(' + zoom + ', ' + zoom + ')';
 
         let top = document.getElementById('board-container').pageYOffset ||
-            document.getElementById('board-container').scrollTop ||
             document.getElementById('board-container').scrollTop || 0,
             left = document.getElementById('board-container').pageXOffset ||
-                document.getElementById('board-container').scrollLeft ||
                 document.getElementById('board-container').scrollLeft || 0,
             width = document.getElementById('board-container').scrollWidth,
-            height = document.getElementById('board-container').scrollHeight;
+            height = document.getElementById('board-container').scrollHeight,
+            cWidth = document.getElementById('board-container').clientWidth,
+            cHeight = document.getElementById('board-container').clientHeight;
 
-        let origin = left / 30 + '% ' + top / 30 + '%';
+        let vPercent = (top / (height - cHeight)) || 0;
+        let hPercent = (left / (width - cWidth)) || 0;
 
-        this.props.actions.modifySettingsParam({zoom: {value: zoom, scale, origin}});
-        console.log('zooming:', zoom);
+        console.log('zoom:', zoom);
+        console.log('v percentage:', vPercent, 'top:', top, 'height:', height, 'cHeight:', cHeight);
+        console.log('h percentage:', hPercent, 'left:', left, 'width:', width, 'cWidth:', cWidth);
 
+        let scrollTop = vPercent * (5000 * zoom - cHeight);
+        let scrollLeft = hPercent  * (5000 * zoom- cWidth);
+
+        console.log('scroll zoom in:', scrollLeft, scrollTop);
+
+        this.props.actions.modifySettingsParam({zoom: {value: zoom, scale, scroll: {scrollTop, scrollLeft}}});
+    }
+
+    resetZoom(){
+        let zoom = 1;
+
+        let scale = 'scale(' + zoom + ', ' + zoom + ')';
+
+        let top = document.getElementById('board-container').pageYOffset ||
+            document.getElementById('board-container').scrollTop || 0,
+            left = document.getElementById('board-container').pageXOffset ||
+                document.getElementById('board-container').scrollLeft || 0,
+            width = document.getElementById('board-container').scrollWidth,
+            height = document.getElementById('board-container').scrollHeight,
+            cWidth = document.getElementById('board-container').clientWidth,
+            cHeight = document.getElementById('board-container').clientHeight;
+
+        let vPercent = (top / (height - cHeight)) || 0;
+        let hPercent = (left / (width - cWidth)) || 0;
+
+        console.log('zoom:', zoom);
+        console.log('v percentage:', vPercent, 'top:', top, 'height:', height, 'cHeight:', cHeight);
+        console.log('h percentage:', hPercent, 'left:', left, 'width:', width, 'cWidth:', cWidth);
+
+        let scrollTop = vPercent * (5000 * zoom - cHeight);
+        let scrollLeft = hPercent  * (5000 * zoom- cWidth);
+
+        console.log('scroll zoom in:', scrollLeft, scrollTop);
+
+        this.props.actions.modifySettingsParam({zoom: {value: zoom, scale, scroll: {scrollTop, scrollLeft}}});
     }
 
     render(){
         return (
-            <div style={{position: 'fixed', right: '10px', bottom: '10px', display: 'flex', flexDirection: 'column', zIndex: '15'}}>
+            <div style={{position: 'fixed', right: '10px', bottom: '10px', display: 'flex', flexDirection: 'column', zIndex: '15'}} onClick={(event)=>event.stopPropagation()}>
+                <label style={{textAlign: 'center'}}>
+                    X{this.props.zoom ? this.props.zoom.value : 1}
+                </label>
                 <button onClick={() => this.zoomIn()}>
                     Zoom In
                 </button>
@@ -318,8 +443,8 @@ class FloatingMenu extends React.Component{
                     Zoom Out
                 </button>
 
-                <button>
-                    Trash
+                <button onClick={() => this.resetZoom()}>
+                    Reset Zoom
                 </button>
             </div>
         )
