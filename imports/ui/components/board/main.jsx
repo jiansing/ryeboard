@@ -237,19 +237,92 @@ class PureBoard extends Component {
 
         const widgets = this.props.widgets;
 
+        let zoomScale = this.props.zoom ? this.props.zoom.scale : '',
+            zoomOrigin = this.props.zoom ? this.props.zoom.origin : '';
+
         return connectDropTarget(
             <div id='board-container'
                  onClick={(event)=> this.deselectAllWidgets(event)}
-                 style={{marginTop: '50px', marginLeft: '75px', width: 'calc(100vw - 75px)', height: 'calc(100vh - 50px)', overflow: 'scroll'}}>
-                <DragLayer />
-                <div  id='board' ref={(container) => this.container= container}>
+                 style={{marginTop: '50px', marginLeft: '75px', width: 'calc(100vw - 75px)',
+                     height: 'calc(100vh - 50px)', overflow: 'scroll'}}>
+                <DragLayer zoomScale={zoomScale} zoomOrigin={zoomOrigin}/>
+                <div  id='board' ref={(container) => this.container= container}
+                      style={{transform: zoomScale, transformOrigin: '0 0'}}>
                     <div className={this.props.isDragging || this.state.resizing ? 'grid show' : 'grid hide'}
                          style={{width: '100%', height: '100%', position: 'absolute'}} />
                     {widgets.map(widget => this.renderWidget(widget))}
                 </div>
+                <FloatingMenu {...this.props}/>
             </div>
 
         );
+    }
+}
+
+class FloatingMenu extends React.Component{
+    constructor(props){
+        super(props);
+    }
+
+    zoomOut(){
+        let zoom = this.props.zoom ? this.props.zoom.value : 1;
+        if(zoom > .25) zoom -= .25;
+
+        let scale = 'scale(' + zoom + ', ' + zoom + ')';
+
+        let top = document.getElementById('board-container').pageYOffset ||
+            document.getElementById('board-container').scrollTop ||
+            document.getElementById('board-container').scrollTop || 0,
+            left = document.getElementById('board-container').pageXOffset ||
+                document.getElementById('board-container').scrollLeft ||
+                document.getElementById('board-container').scrollLeft || 0,
+            width = document.getElementById('board-container').scrollWidth,
+            height = document.getElementById('board-container').scrollHeight;
+
+        let origin = left / 30 + '% ' + top / 30 + '%';
+
+        this.props.actions.modifySettingsParam({zoom: {value: zoom, scale, origin}});
+        console.log('zooming:', zoom);
+    }
+
+    zoomIn(){
+        let zoom = this.props.zoom ? this.props.zoom.value : 1;
+        if(zoom < 1.75) zoom += .25;
+
+        let scale = 'scale(' + zoom + ', ' + zoom + ')';
+
+        let top = document.getElementById('board-container').pageYOffset ||
+            document.getElementById('board-container').scrollTop ||
+            document.getElementById('board-container').scrollTop || 0,
+            left = document.getElementById('board-container').pageXOffset ||
+                document.getElementById('board-container').scrollLeft ||
+                document.getElementById('board-container').scrollLeft || 0,
+            width = document.getElementById('board-container').scrollWidth,
+            height = document.getElementById('board-container').scrollHeight;
+
+        let origin = left / 30 + '% ' + top / 30 + '%';
+
+        this.props.actions.modifySettingsParam({zoom: {value: zoom, scale, origin}});
+        console.log('zooming:', zoom);
+
+    }
+
+    render(){
+        return (
+            <div style={{position: 'fixed', right: '10px', bottom: '10px', display: 'flex', flexDirection: 'column', zIndex: '15'}}>
+                <button onClick={() => this.zoomIn()}>
+                    Zoom In
+                </button>
+
+                <button onClick={() => this.zoomOut()}>
+                    Zoom Out
+                </button>
+
+                <button>
+                    Trash
+                </button>
+            </div>
+        )
     }
 }
 
@@ -258,12 +331,14 @@ function selector(dispatch) {
     const actions = bindActionCreators(Object.assign({}, Actions, ActionCreators), dispatch);
     return (nextState, nextOwnProps) => {
 
+        let zoom = nextState.settings.zoom;
         nextState = nextState.undoable.present;
 
         const nextResult = {
             actions: actions,
             selectedWidgets: nextState.boardLogic.selected,
-            widgets: nextState.boardLayout
+            widgets: nextState.boardLayout,
+            zoom
         };
 
         if(!equals(nextResult, result)){
