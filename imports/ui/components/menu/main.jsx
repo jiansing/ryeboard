@@ -57,11 +57,11 @@ class PureMenu extends Component {
             <div style={{background: '#F2F2F2', marginTop: '50px', height: 'calc(100vh - 50px)', display: 'flex', position: 'fixed', top: 0,
                 left: 0, width: '75px', zIndex: 4, boxShadow: '0 1px 1px 0 rgba(0, 0, 0, 0.15), 0 0px 1px 0 rgba(0, 0, 0, 0.15)'}}>
                 {this.props.currentMenu === null || typeof this.props.currentMenu === 'undefined' ?
-                    <div style={{height: '100%', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '1rem'}}>
+                    <div style={{height: '100%', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '12px'}}>
                         {this.renderPreviews()}
                     </div> :
                     <div onMouseDown={(event)=>event.preventDefault()}
-                         style={{height: '100%', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '1rem'}}>
+                         style={{height: '100%', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '12px'}}>
                         {this.renderMenu()}
                     </div>
                 }

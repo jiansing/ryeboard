@@ -2,27 +2,18 @@ import React, { Component } from 'react'
 import { DragLayer } from 'react-dnd'
 import Widget from '../widget/main';
 
-const layerStyles = {
-    position: 'fixed',
-    pointerEvents: 'none',
-    zIndex: 100,
-    left: 0,
-    top: 0,
-    width: '100%',
-    height: '100%',
-};
-
 function getItemStyles(props) {
-    const { initialOffset, currentOffset } = props;
+    const { initialOffset, currentOffset, zoomValue } = props;
     if (!initialOffset || !currentOffset) {
         return {
             display: 'none',
         }
     }
 
+
     let { x, y } = currentOffset;
 
-    const transform = `translate(${x}px, ${y}px)`;
+    const transform = `translate(${x / zoomValue}px, ${y / zoomValue}px)`;
     return {
         transform,
         WebkitTransform: transform,
@@ -57,7 +48,17 @@ class PureDragLayer extends Component {
             this.renderItem(itemType, item);
 
         return (
-            <div style={layerStyles}>
+            <div style={{
+                position: 'fixed',
+                pointerEvents: 'none',
+                zIndex: 100,
+                left: 0,
+                top: 0,
+                width: '100%',
+                height: '100%',
+                transform: this.props.zoomScale || '',
+                transformOrigin: '0 0'
+            }} className={'board-drag'}>
                 <div style={getItemStyles(this.props)}>
                     {widgets}
                 </div>

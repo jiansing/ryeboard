@@ -9,18 +9,16 @@ const widgetSource = {
             type = props.type,
             data = props.data,
             top = document.getElementById('board-container').pageYOffset ||
-                document.getElementById('board-container').scrollTop ||
                 document.getElementById('board-container').scrollTop || 0,
             left = document.getElementById('board-container').pageXOffset ||
-                document.getElementById('board-container').scrollLeft ||
                 document.getElementById('board-container').scrollLeft || 0,
             width = props.width || 150,
             height = props.height || 150;
 
-        let topOffset = document.getElementById('preview-' + props.type).parentElement.offsetTop,
-            leftOffset = document.getElementById('preview-' + props.type).parentElement.offsetLeft;
+        let topOffset = document.getElementById('preview-' + props.type).parentElement.offsetTop + 5,
+            leftOffset = document.getElementById('preview-' + props.type).parentElement.offsetLeft + 10;
 
-        //console.log('top offset:', topOffset, '\nleftOffset:', leftOffset, '\ntop:', top, '\nleft:',left);
+        console.log('top offset:', topOffset, '\nleftOffset:', leftOffset, '\ntop:', top, '\nleft:',left);
 
         top += topOffset;
         left -= 75 - leftOffset;
