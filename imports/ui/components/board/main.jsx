@@ -302,13 +302,14 @@ class PureBoard extends Component {
             area: document.getElementById('board-container'),
             onElementSelect: function(element) {
                 if(!selectDisabled){
+                    console.log('>>> selecting element:', element.id);
                     let id = element.id;
                     self.multiSelectWidget(parseInt(id));
                 }
             },
             onElementUnselect: function(element) {
-                console.log(selectDisabled);
                 if(!selectDisabled){
+                    console.log('>>> unselecting element:', element.id);
                     let id = element.id;
                     self.multiSelectWidget(parseInt(id));
                 }
@@ -325,6 +326,7 @@ class PureBoard extends Component {
         });
 
         ds.area.addEventListener('mousedown', function (event) {
+            ds.clearSelection();
             selectDisabled = event.srcElement.className.indexOf('grid') === -1;
             if(selectDisabled){
                 ds.stop();
@@ -333,8 +335,10 @@ class PureBoard extends Component {
                 ds.addSelectables(document.getElementsByClassName('selectable'));
 
                 if(!event.shiftKey) {
+                    console.log('deselecting all');
                     self.props.actions.deselectAllWidgetFromBoard();
                 }
+
                 ds.setScale(self.props.zoom.value);
                 ds.start();
             }
@@ -430,7 +434,6 @@ class FloatingMenu extends React.Component{
     }
 
     zoomIn(){
-        console.log('zoom prop:', this.props.zoom);
         let zoom = this.props.zoom ? this.props.zoom.value : 1;
         if(zoom === .5) zoom = .6;
         else if(zoom === .6) zoom = .75;
@@ -476,34 +479,37 @@ class FloatingMenu extends React.Component{
         let vPercent = (top / (height - cHeight)) || 0;
         let hPercent = (left / (width - cWidth)) || 0;
 
-        console.log('zoom:', zoom);
-        console.log('v percentage:', vPercent, 'top:', top, 'height:', height, 'cHeight:', cHeight);
-        console.log('h percentage:', hPercent, 'left:', left, 'width:', width, 'cWidth:', cWidth);
-
         let scrollTop = vPercent * (5000 * zoom - cHeight);
         let scrollLeft = hPercent  * (5000 * zoom- cWidth);
-
-        console.log('scroll zoom in:', scrollLeft, scrollTop);
 
         this.props.actions.modifySettingsParam({zoom: {value: zoom, scale, scroll: {scrollTop, scrollLeft}}});
     }
 
     render(){
         return (
-            <div style={{position: 'fixed', right: '10px', bottom: '10px', display: 'flex', flexDirection: 'column', zIndex: '15'}} onClick={(event)=>event.stopPropagation()}>
+            <div style={{position: 'fixed', right: '15px', bottom: '20px', display: 'flex', width: '75px',
+                flexDirection: 'column', zIndex: '15'}}
+                 onClick={(event)=>event.stopPropagation()}>
                 <label style={{textAlign: 'center'}}>
                     X{this.props.zoom ? this.props.zoom.value : 1}
                 </label>
-                <button onClick={() => this.zoomIn()}>
-                    Zoom In
+
+                <button style={{textAlign: 'center', margin: '5px', marginTop: '10px'}}
+                        className={'btn-floating'}
+                        onClick={() => this.zoomIn()}>
+                    <img src={'/icons/zoom-in.svg'} height={30} width={30}/>
                 </button>
 
-                <button onClick={() => this.zoomOut()}>
-                    Zoom Out
+                <button style={{textAlign: 'center', margin: '5px'}}
+                        className={'btn-floating'}
+                        onClick={() => this.zoomOut()}>
+                    <img src={'/icons/zoom-out.svg'} height={30} width={30}/>
                 </button>
 
-                <button onClick={() => this.resetZoom()}>
-                    Reset Zoom
+                <button style={{textAlign: 'center', margin: '5px'}}
+                        className={'btn-floating'}
+                        onClick={() => this.resetZoom()}>
+                    <img src={'/icons/zoom-reset.svg'} height={30} width={30}/>
                 </button>
             </div>
         )
