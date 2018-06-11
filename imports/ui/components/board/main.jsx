@@ -395,53 +395,6 @@ class PureBoard extends Component {
     }
 }
 
-class SelectBox extends React.Component{
-    constructor(props){
-        super(props);
-        this.state = {
-            initialX: 0,
-            initialY: 0,
-            width: 0,
-            height: 0
-        }
-    }
-
-    componentDidMount(){
-
-        /*new DragSelect({
-            selectables: document.getElementsByClassName('selectable-nodes'),
-            area: document.getElementById('board-container')
-        });*/
-
-        console.log('adding on drag');
-        window.addEventListener('ondrag', function(event){
-           console.log('dragging!');
-        });
-        window.addEventListener('ondragstart', function(event){
-            console.log('dragging start!');
-        });
-        window.addEventListener('ondragend', function(event){
-            console.log('dragging end!');
-        });
-    }
-
-    render(){
-
-        const {left, top, width, height} = this.props;
-
-        return(
-            <div draggable={true}
-                 onClick={(event)=> console.log(event)}
-                 onDragStart={(event)=> console.log(event)}
-                 onDrag={(event)=> console.log(event)}
-                 onDragEnd={(event)=>console.log(event)}
-                 style={{background: 'transparent', position: 'fixed', width: '100vw', height: '100vh', left: 0, top: 0}}>
-                <div style={{position: 'absolute', left: left, top: top, width: width, height: height, background: 'rgba(85, 85, 85, 0.58)', outline: 'dodgerBlue'}} />
-            </div>
-        )
-    }
-}
-
 class FloatingMenu extends React.Component{
     constructor(props){
         super(props);
