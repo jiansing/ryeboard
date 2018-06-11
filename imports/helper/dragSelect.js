@@ -260,11 +260,7 @@ DragSelect.prototype._createSelector = function() {
  * Starts the functionality. Automatically triggered when created.
  */
 DragSelect.prototype.setScale = function(scale) {
-
-    console.log('setting scale as:', scale);
-
     this.scale = scale;
-
 };
 
 
