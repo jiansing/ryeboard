@@ -13,7 +13,7 @@ import { NativeTypes } from 'react-dnd-html5-backend';
 import isUrlImage from '/imports/helper/isUrlImage';
 import store from '/imports/redux/store';
 
-import DragSelect from 'dragselect'
+import DragSelect from '/imports/helper/dragSelect'
 
 const widgetTarget = {
     drop(props, monitor, component) {
@@ -90,9 +90,7 @@ const widgetTarget = {
                 let left = item.left + delta.x;
                 let top = item.top + delta.y;
 
-                console.log('before snap:', left, top);
                 [left, top] = snapToGrid(left / zoomValue, top / zoomValue);
-                console.log('after snap:', left, top);
 
                 if(item.newWidget) {
                     delete item.newWidget;
@@ -181,17 +179,13 @@ class PureBoard extends Component {
     }
 
     multiSelectWidget(id, data) {
-        console.log('multi-select:', id);
         let selection = this.props.selectedWidgets;
         if(Array.isArray(selection) && selection.findIndex((elem)=>elem.id === id)!==-1){
-            console.log('removing from list');
             this.props.actions.deselectWidgetFromBoard(id, data);
         }
         else {
-            console.log('adding to list');
             this.props.actions.multiSelectWidgetFromBoard(id, data);
         }
-        console.log('\n');
     }
 
     addWidget(data) {
@@ -310,7 +304,6 @@ class PureBoard extends Component {
                 if(!selectDisabled){
                     let id = element.id;
                     self.multiSelectWidget(parseInt(id));
-                    console.log('>>> drag select:', id);
                 }
             },
             onElementUnselect: function(element) {
@@ -318,7 +311,6 @@ class PureBoard extends Component {
                 if(!selectDisabled){
                     let id = element.id;
                     self.multiSelectWidget(parseInt(id));
-                    console.log('>>> drag unselect:', id);
                 }
             },
             onDragStart: function(event) {
@@ -333,20 +325,17 @@ class PureBoard extends Component {
         });
 
         ds.area.addEventListener('mousedown', function (event) {
-            console.log('mousedown');
             selectDisabled = event.srcElement.className.indexOf('grid') === -1;
             if(selectDisabled){
-                console.log('stopping');
                 ds.stop();
             }
             else {
-                ds.addSelectables(document.getElementsByClassName('selectable'))
-                console.log('starting');
+                ds.addSelectables(document.getElementsByClassName('selectable'));
 
                 if(!event.shiftKey) {
                     self.props.actions.deselectAllWidgetFromBoard();
                 }
-
+                ds.setScale(self.props.zoom.value);
                 ds.start();
             }
             mouseDown = [event.pageX, event.pageY];

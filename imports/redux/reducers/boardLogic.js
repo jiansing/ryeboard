@@ -39,7 +39,6 @@ function selection(state = DEFAULT_STATE, action) {
             else{
                 newState.selected = [action.value];
             }
-            console.log(newState);
             return newState;
         }
 
