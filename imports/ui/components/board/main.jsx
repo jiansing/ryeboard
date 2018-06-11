@@ -156,10 +156,8 @@ class PureBoard extends Component {
                             else selected = selected.id;
 
 
-                            console.log('delete:', selected);
 
                             if(selected != null){
-                                console.log('removing');
                                 self.props.actions.removeFromBoard(selected);
                                 self.props.actions.setMutable();
                                 if(Meteor.user()) Meteor.call('boards.update', store.getState());
@@ -302,14 +300,12 @@ class PureBoard extends Component {
             area: document.getElementById('board-container'),
             onElementSelect: function(element) {
                 if(!selectDisabled){
-                    console.log('>>> selecting element:', element.id);
                     let id = element.id;
                     self.multiSelectWidget(parseInt(id));
                 }
             },
             onElementUnselect: function(element) {
                 if(!selectDisabled){
-                    console.log('>>> unselecting element:', element.id);
                     let id = element.id;
                     self.multiSelectWidget(parseInt(id));
                 }
@@ -327,6 +323,7 @@ class PureBoard extends Component {
 
         ds.area.addEventListener('mousedown', function (event) {
             ds.clearSelection();
+
             selectDisabled = event.srcElement.className.indexOf('grid') === -1;
             if(selectDisabled){
                 ds.stop();
@@ -334,16 +331,19 @@ class PureBoard extends Component {
             else {
                 ds.addSelectables(document.getElementsByClassName('selectable'));
 
-                if(!event.shiftKey) {
-                    console.log('deselecting all');
-                    self.props.actions.deselectAllWidgetFromBoard();
-                }
-
                 ds.setScale(self.props.zoom.value);
                 ds.start();
             }
             mouseDown = [event.pageX, event.pageY];
         }, true);
+
+        ds.area.addEventListener('mousedown', function (event) {
+
+            if(!selectDisabled && !event.shiftKey) {
+                self.deselectAllWidgets(event);
+            }
+
+        }, false);
 
         ds.area.addEventListener('mousemove', function (event) {
             if(mouseDown) {
@@ -354,7 +354,7 @@ class PureBoard extends Component {
 
         ds.area.addEventListener('mouseup', function (event) {
             if(!selectDisabled && Math.abs(mouseDown[0] - dragValue[0]) <= 5 && Math.abs(mouseDown[1] - dragValue[1]) <= 5){
-                self.deselectAllWidgets(event)
+                //self.deselectAllWidgets(event)
             }
             dragValue = [0,0];
             mouseDown = [0,0];
