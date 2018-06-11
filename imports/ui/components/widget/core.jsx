@@ -114,7 +114,8 @@ class PureWidget extends Component {
     select(event){
 
         if(event.shiftKey) {
-            this.props.handleMultiSelect(this.props.id, {menu: this.props.menu});
+            console.log('widget multi select');
+            this.props.handleMultiSelect(this.props.id);
         }
         else {
             this.props.handleSelect(this.props.id, {menu: this.props.menu});
@@ -126,7 +127,7 @@ class PureWidget extends Component {
         const { id, connectDragSource, resizeOpts } = this.props;
 
         return connectDragSource(
-            <div style={getStyles(this.props)}>
+            <div style={getStyles(this.props)} className={'selectable'} id={id}>
                 <div>
                     <ResizableBox width={this.props.width || 300} height={this.props.height || 150}
                                   minConstraints={this.props.minSize || [90, 60]}

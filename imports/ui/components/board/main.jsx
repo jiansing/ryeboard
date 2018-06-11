@@ -13,6 +13,8 @@ import { NativeTypes } from 'react-dnd-html5-backend';
 import isUrlImage from '/imports/helper/isUrlImage';
 import store from '/imports/redux/store';
 
+import DragSelect from '/imports/helper/dragSelect'
+
 const widgetTarget = {
     drop(props, monitor, component) {
 
@@ -22,7 +24,7 @@ const widgetTarget = {
         }
 
         const item = monitor.getItem(),
-              zoomValue = props.zoom ? props.zoom.value : 1;;
+            zoomValue = props.zoom ? props.zoom.value : 1;;
 
         if(Array.isArray(item.selectedWidgets)){
 
@@ -88,9 +90,7 @@ const widgetTarget = {
                 let left = item.left + delta.x;
                 let top = item.top + delta.y;
 
-                console.log('before snap:', left, top);
                 [left, top] = snapToGrid(left / zoomValue, top / zoomValue);
-                console.log('after snap:', left, top);
 
                 if(item.newWidget) {
                     delete item.newWidget;
@@ -118,6 +118,7 @@ class PureBoard extends Component {
         this.state = {
             selected: null,
             resizing: false,
+            dragging: false,
         };
         let self = this;
 
@@ -179,12 +180,12 @@ class PureBoard extends Component {
 
     multiSelectWidget(id, data) {
         let selection = this.props.selectedWidgets;
-        console.log('multi select test:', selection);
         if(Array.isArray(selection) && selection.findIndex((elem)=>elem.id === id)!==-1){
             this.props.actions.deselectWidgetFromBoard(id, data);
         }
-        else this.props.actions.multiSelectWidgetFromBoard(id, data);
-        if(Meteor.user()) Meteor.call('boards.update', store.getState());
+        else {
+            this.props.actions.multiSelectWidgetFromBoard(id, data);
+        }
     }
 
     addWidget(data) {
@@ -222,8 +223,8 @@ class PureBoard extends Component {
     }
 
     deselectAllWidgets(event){
-        console.log('deselect widget');
         if(!event.shiftKey){
+            document.activeElement.blur();
             this.props.actions.deselectAllWidgetFromBoard();
         }
     }
@@ -275,7 +276,7 @@ class PureBoard extends Component {
                 };
                 animateScroll();
             }
-            
+
             //t = current time
             //b = start value
             //c = change in value
@@ -287,6 +288,76 @@ class PureBoard extends Component {
                 return -c/2 * (t*(t-2) - 1) + b;
             };
         }
+    }
+
+    componentDidMount(){
+        
+        let self = this,
+            selectDisabled = true,
+            mouseDown = [0,0],
+            dragValue = [0,0];
+        
+        let ds = new DragSelect({
+            selectables: document.getElementsByClassName('selectable'),
+            area: document.getElementById('board-container'),
+            onElementSelect: function(element) {
+                if(!selectDisabled){
+                    let id = element.id;
+                    self.multiSelectWidget(parseInt(id));
+                }
+            },
+            onElementUnselect: function(element) {
+                console.log(selectDisabled);
+                if(!selectDisabled){
+                    let id = element.id;
+                    self.multiSelectWidget(parseInt(id));
+                }
+            },
+            onDragStart: function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+            },
+            onDragMove: function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+            },
+            multiSelectKeys: []
+        });
+
+        ds.area.addEventListener('mousedown', function (event) {
+            selectDisabled = event.srcElement.className.indexOf('grid') === -1;
+            if(selectDisabled){
+                ds.stop();
+            }
+            else {
+                ds.addSelectables(document.getElementsByClassName('selectable'));
+
+                if(!event.shiftKey) {
+                    self.props.actions.deselectAllWidgetFromBoard();
+                }
+                ds.setScale(self.props.zoom.value);
+                ds.start();
+            }
+            mouseDown = [event.pageX, event.pageY];
+        }, true);
+
+        ds.area.addEventListener('mousemove', function (event) {
+            if(mouseDown) {
+                dragValue = [event.pageX, event.pageY]
+            }
+        }, true);
+
+
+        ds.area.addEventListener('mouseup', function (event) {
+            if(!selectDisabled && Math.abs(mouseDown[0] - dragValue[0]) <= 5 && Math.abs(mouseDown[1] - dragValue[1]) <= 5){
+                self.deselectAllWidgets(event)
+            }
+            dragValue = [0,0];
+            mouseDown = [0,0];
+            selectDisabled = true;
+            ds.clearSelection();
+        }, true);
+
     }
 
     renderWidget(item) {
@@ -306,10 +377,9 @@ class PureBoard extends Component {
 
         return connectDropTarget(
             <div id='board-container'
-                 onScroll={(event)=> console.log('l:', document.getElementById('board-container').scrollLeft, 't:', document.getElementById('board-container').scrollTop)}
-                 onClick={(event)=> this.deselectAllWidgets(event)}
                  style={{marginTop: '50px', marginLeft: '75px', width: 'calc(100vw - 75px)',
                      height: 'calc(100vh - 50px)', overflow: 'scroll'}}>
+
                 <DragLayer zoomValue={zoomValue} zoomScale={zoomScale}/>
                 <div  id='board' ref={(container) => this.container= container}
                       style={{transform: zoomScale + ' translate3d(0px,0px,0px)', transformOrigin: '0 0'}}>
@@ -317,6 +387,7 @@ class PureBoard extends Component {
                          style={{width: '100%', height: '100%', position: 'absolute'}} />
                     {widgets.map(widget => this.renderWidget(widget))}
                 </div>
+
                 <FloatingMenu {...this.props}/>
             </div>
 
@@ -352,14 +423,8 @@ class FloatingMenu extends React.Component{
         let vPercent = top / (height - cHeight) || 0;
         let hPercent = left / (width - cWidth) || 0;
 
-        console.log('zoom:', zoom);
-        console.log('v percentage:', vPercent, 'top:', top, 'height:', height, 'cHeight:', cHeight);
-        console.log('h percentage:', hPercent, 'left:', left, 'width:', width, 'cWidth:', cWidth);
-
         let scrollTop = vPercent * (5000 * zoom - cHeight);
         let scrollLeft = hPercent  * (5000 * zoom- cWidth);
-
-        console.log('scroll zoom out:', scrollLeft, scrollTop);
 
         this.props.actions.modifySettingsParam({zoom: {value: zoom, scale, scroll: {scrollTop, scrollLeft}}});
     }
@@ -388,14 +453,8 @@ class FloatingMenu extends React.Component{
         let vPercent = (top / (height - cHeight)) || 0;
         let hPercent = (left / (width - cWidth)) || 0;
 
-        console.log('zoom:', zoom);
-        console.log('v percentage:', vPercent, 'top:', top, 'height:', height, 'cHeight:', cHeight);
-        console.log('h percentage:', hPercent, 'left:', left, 'width:', width, 'cWidth:', cWidth);
-
         let scrollTop = vPercent * (5000 * zoom - cHeight);
         let scrollLeft = hPercent  * (5000 * zoom- cWidth);
-
-        console.log('scroll zoom in:', scrollLeft, scrollTop);
 
         this.props.actions.modifySettingsParam({zoom: {value: zoom, scale, scroll: {scrollTop, scrollLeft}}});
     }

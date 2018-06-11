@@ -159,11 +159,13 @@ class PureTextEditor extends Component{
                             readOnly={!this.state.focused}
                             plugins={plugins}
                             onBlur={()=>{
+                                console.log('blurring');
                                 let editor = EditorState.set(this.state.editorState, {allowUndo: false});
                                 this.setState({focused: false, editorState: editor});
                                 this.makeMutable();
                             }}
                             onFocus={()=>{
+                                console.log('focusing');
                                 let editor = EditorState.set(this.state.editorState, {allowUndo: true});
                                 this.setState({focused: true, editorState: editor});
                             }}
