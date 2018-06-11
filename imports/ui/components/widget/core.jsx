@@ -112,8 +112,9 @@ class PureWidget extends Component {
     }
 
     select(event){
-        console.log('selecting:', event);
+
         if(event.shiftKey) {
+            console.log('widget multi select');
             this.props.handleMultiSelect(this.props.id);
         }
         else {
@@ -131,7 +132,6 @@ class PureWidget extends Component {
                     <ResizableBox width={this.props.width || 300} height={this.props.height || 150}
                                   minConstraints={this.props.minSize || [90, 60]}
                                   onClick={(event) => event.stopPropagation()}
-                                  onMouseDownCapture={(event)=>console.log('mouse down:', event)}
                                   onClickCapture={(event)=> this.select(event)}
                                   maxConstraints={this.props.maxSize || [Infinity, Infinity]}
                                   onResizeStart={(event)=>this.preventDndOnResize(event)}
