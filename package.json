@@ -47,5 +47,8 @@
     "redux-undo": "^1.0.0-beta9-9-7",
     "tui-image-editor": "^3.1.0",
     "updeep": "^1.0.0"
+  },
+  "devDependencies": {
+    "dragselect": "^1.7.24"
   }
 }
