@@ -42,7 +42,7 @@ function selection(state = DEFAULT_STATE, action) {
 
         case types.BOARD_MULTI_SELECT_WIDGET :
         case types.BOARD_SELECT_WIDGET: {
-            if(action.value === null) return state;
+            return state;
             let newState = state.slice();
             let pos = state.findIndex((elem) => elem.id === action.value.id);
             let selectedWidget = newState[pos];

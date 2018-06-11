@@ -13,6 +13,8 @@ import { NativeTypes } from 'react-dnd-html5-backend';
 import isUrlImage from '/imports/helper/isUrlImage';
 import store from '/imports/redux/store';
 
+import DragSelect from 'dragselect'
+
 const widgetTarget = {
     drop(props, monitor, component) {
 
@@ -22,7 +24,7 @@ const widgetTarget = {
         }
 
         const item = monitor.getItem(),
-              zoomValue = props.zoom ? props.zoom.value : 1;;
+            zoomValue = props.zoom ? props.zoom.value : 1;;
 
         if(Array.isArray(item.selectedWidgets)){
 
@@ -118,6 +120,7 @@ class PureBoard extends Component {
         this.state = {
             selected: null,
             resizing: false,
+            dragging: false,
         };
         let self = this;
 
@@ -179,12 +182,10 @@ class PureBoard extends Component {
 
     multiSelectWidget(id, data) {
         let selection = this.props.selectedWidgets;
-        console.log('multi select test:', selection);
         if(Array.isArray(selection) && selection.findIndex((elem)=>elem.id === id)!==-1){
             this.props.actions.deselectWidgetFromBoard(id, data);
         }
         else this.props.actions.multiSelectWidgetFromBoard(id, data);
-        if(Meteor.user()) Meteor.call('boards.update', store.getState());
     }
 
     addWidget(data) {
@@ -275,7 +276,7 @@ class PureBoard extends Component {
                 };
                 animateScroll();
             }
-            
+
             //t = current time
             //b = start value
             //c = change in value
@@ -287,6 +288,54 @@ class PureBoard extends Component {
                 return -c/2 * (t*(t-2) - 1) + b;
             };
         }
+    }
+
+    componentDidMount(){
+        
+        let self = this,
+            selectDisabled = false;
+        
+        let ds = new DragSelect({
+            selectables: document.getElementsByClassName('selectable'),
+            area: document.getElementById('board-container'),
+            onElementSelect: function(element) {
+                let id = element.id;
+                self.multiSelectWidget(parseInt(id));
+            },
+            onElementUnselect: function(element) {
+                let id = element.id;
+                self.multiSelectWidget(parseInt(id));
+            },
+            onDragStart: function(event) {
+                console.log('drag start');
+                event.preventDefault();
+                event.stopPropagation();
+            },
+            onDragMove: function(event) {
+                console.log('drag move');
+                event.preventDefault();
+                event.stopPropagation();
+            },
+            callback: (event) => console.log('callback for drag')
+        })
+
+        ds.area.addEventListener('mousedown', function (event) {
+            selectDisabled = event.srcElement.className.indexOf('grid') === -1;
+            if(selectDisabled){
+                ds.stop();
+            }
+            else {
+                ds.start();
+            }
+        }, true);
+
+
+        ds.area.addEventListener('mouseup', function (event) {
+            if(selectDisabled){
+                self.deselectAllWidgets(event)
+            }
+        }, true);
+
     }
 
     renderWidget(item) {
@@ -306,8 +355,6 @@ class PureBoard extends Component {
 
         return connectDropTarget(
             <div id='board-container'
-                 onScroll={(event)=> console.log('l:', document.getElementById('board-container').scrollLeft, 't:', document.getElementById('board-container').scrollTop)}
-                 onClick={(event)=> this.deselectAllWidgets(event)}
                  style={{marginTop: '50px', marginLeft: '75px', width: 'calc(100vw - 75px)',
                      height: 'calc(100vh - 50px)', overflow: 'scroll'}}>
                 <DragLayer zoomValue={zoomValue} zoomScale={zoomScale}/>
@@ -317,10 +364,58 @@ class PureBoard extends Component {
                          style={{width: '100%', height: '100%', position: 'absolute'}} />
                     {widgets.map(widget => this.renderWidget(widget))}
                 </div>
+
                 <FloatingMenu {...this.props}/>
             </div>
 
         );
+    }
+}
+
+class SelectBox extends React.Component{
+    constructor(props){
+        super(props);
+        this.state = {
+            initialX: 0,
+            initialY: 0,
+            width: 0,
+            height: 0
+        }
+    }
+
+    componentDidMount(){
+
+        /*new DragSelect({
+            selectables: document.getElementsByClassName('selectable-nodes'),
+            area: document.getElementById('board-container')
+        });*/
+
+        console.log('adding on drag');
+        window.addEventListener('ondrag', function(event){
+           console.log('dragging!');
+        });
+        window.addEventListener('ondragstart', function(event){
+            console.log('dragging start!');
+        });
+        window.addEventListener('ondragend', function(event){
+            console.log('dragging end!');
+        });
+    }
+
+    render(){
+
+        const {left, top, width, height} = this.props;
+
+        return(
+            <div draggable={true}
+                 onClick={(event)=> console.log(event)}
+                 onDragStart={(event)=> console.log(event)}
+                 onDrag={(event)=> console.log(event)}
+                 onDragEnd={(event)=>console.log(event)}
+                 style={{background: 'transparent', position: 'fixed', width: '100vw', height: '100vh', left: 0, top: 0}}>
+                <div style={{position: 'absolute', left: left, top: top, width: width, height: height, background: 'rgba(85, 85, 85, 0.58)', outline: 'dodgerBlue'}} />
+            </div>
+        )
     }
 }
 
