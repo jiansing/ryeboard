@@ -132,6 +132,16 @@ class PureTextEditor extends Component{
 
     render(){
 
+        let className = 'showPlaceholder';
+        let contentState = this.state.editorState.getCurrentContent();
+        if (!contentState.hasText()) {
+            if (contentState.getBlockMap().first().getType() !== 'unstyled') {
+                className = ' hidePlaceholder';
+            }
+        }
+
+        console.log('className?', className);
+
         return(
             <Core selected={this.props.selected}
                   focused={this.state.focused}
@@ -149,6 +159,7 @@ class PureTextEditor extends Component{
                      }}/>
                 <div style={{height: '100%', width: '100%', overflowY: 'auto', padding: '15px', outline: 'none'}}
                      onClick={()=> this.editor.focus()}
+                     className={className}
                      onBlur={()=>{
                          this.setState({focused: false});
                          this.editor.blur();
