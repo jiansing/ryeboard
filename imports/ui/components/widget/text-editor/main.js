@@ -14,7 +14,6 @@ import Editor from 'draft-js-plugins-editor';
 import createLinkifyPlugin from 'draft-js-linkify-plugin';
 import createAutoListPlugin from 'draft-js-autolist-plugin'
 
-import 'draft-js/dist/Draft.css'
 import store from '/imports/redux/store';
 
 let linkify = createLinkifyPlugin({
@@ -139,8 +138,6 @@ class PureTextEditor extends Component{
                 className = ' hidePlaceholder';
             }
         }
-
-        console.log('className?', className);
 
         return(
             <Core selected={this.props.selected}

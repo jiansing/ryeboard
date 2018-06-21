@@ -14,8 +14,6 @@ import isUrlImage from '/imports/helper/isUrlImage';
 import store from '/imports/redux/store';
 
 import getAspectRatio from './tools/getAspectRatio';
-import ReactCrop from 'react-image-crop';
-import rotateImage from './tools/rotate';
 import EditCanvas from './tools/editCanvas';
 
 function processImageData(file, setImage){

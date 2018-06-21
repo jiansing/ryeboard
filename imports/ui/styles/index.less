@@ -1,12 +1,16 @@
+/**
+Entry point for rest of LESS files
+
+Don't mess with the files with the -lib suffix, they're used in libraries.
+ */
+
 @import "elements";
-@import "normalize";
+@import "normalize-lib";
 @import "fonts";
-@import "grid";
 @import "overrides";
-@import "nav-bar";
+@import "navbar";
 @import "footer";
 @import "forumElements";
-@import "resizeable";
-@import "editor";
-@import "emoji";
-@import "cropper.min.less";
+@import "resizeable-lib";
+@import "draftjs-editor";
+@import "cropper-lib.min.less";
