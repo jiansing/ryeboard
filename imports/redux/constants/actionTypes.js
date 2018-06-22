@@ -1,5 +1,5 @@
 /**
- * Created by JohnBae on 7/1/17.
+ * Constants for different types of actions
  */
 
 //Board Creator Action Constants

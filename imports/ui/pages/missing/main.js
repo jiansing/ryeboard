@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 
 /*
-A page to redirect users to existing page.
+ *  A page to redirect users to existing (home) page.
  */
 
 const Missing = ({ history }) => (
