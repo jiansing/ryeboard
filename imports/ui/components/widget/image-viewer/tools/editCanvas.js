@@ -2,16 +2,13 @@ import React, {Component} from 'react';
 import Modal from 'react-modal';
 import Cropper from 'react-cropper';
 
-const customStyles = {
-    overlay: {
-        zIndex: 10,
-        display: 'flex'
-    },
-    content : {
-        padding: 0,
-    }
-};
+/**
+ * Edit window for images
+ *
+ * Enables users to do light editing to uploaded images
+ */
 
+//Set up modal window
 Modal.setAppElement(document.getElementById('render-target'));
 
 class App extends React.Component {
@@ -93,7 +90,6 @@ class App extends React.Component {
                 return(
                     <div style={{height: '50px', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                         <button className='btn-ghost' onClick={()=> this.reset()}>reset</button>
-                        <button className='btn-ghost' onClick={()=> this.cropper.clear()}>reset crop</button>
                         <button className='btn-ghost' onClick={()=> this.cropper.rotate(-90)}>rotate left</button>
                         <button className='btn-ghost' onClick={()=> this.cropper.rotate(90)}>rotate right</button>
                         <button className='btn-ghost' onClick={()=> this.flipX()}>flip X</button>
@@ -114,7 +110,15 @@ class App extends React.Component {
                 <Modal isOpen={true}
                        parentSelector={()=>document.getElementById('render-target')}
                        onRequestClose={() => this.closeModal()}
-                       style={customStyles}
+                       style={{
+                           overlay: {
+                               zIndex: 10,
+                               display: 'flex'
+                           },
+                           content : {
+                               padding: 0,
+                           }
+                       }}
                        ariaHideApp={false}>
                     <div style={{padding: '15px', width: '100%', height: '100%'}} onClick={(event)=> event.stopPropagation()}>
                         <div style={{height: '50px'}}>
