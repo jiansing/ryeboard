@@ -94,6 +94,10 @@ class PureWidget extends Component {
         })
     }
 
+    clickHandler(){
+
+    }
+
     preventDndOnResize(event){
         document.activeElement.blur();
         event.stopPropagation();
