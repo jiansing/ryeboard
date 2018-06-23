@@ -110,7 +110,13 @@ export const modifySettingsParam = (value) => {
 
 //***** Other Redux Actions *****//
 
-//Tells undoable that a state is not undoable
+/**
+ * Tells undoable library that a state is undoable.
+ *
+ * Undo redo actions use this action as check points to know where to undo redo to.
+ * For example, When adding image files the board adds the widget first and then renders the image later.
+ * To make this into one undoable event, this setMutable action is called at the end of the two actions.
+ */
 export const setMutable = () => {
     return {
         type: 'SET_MUTABLE'

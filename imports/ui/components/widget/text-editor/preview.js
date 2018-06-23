@@ -6,6 +6,9 @@ import React, {Component} from 'react';
 import PreviewCore from '../widgetPreview';
 import {EditorState} from 'draft-js';
 
+/**
+ * How the note widget preview looks on the menu
+ */
 export default class Preview extends Component{
     constructor(props){
         super(props);
