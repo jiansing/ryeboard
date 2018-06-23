@@ -40,7 +40,7 @@ Slingshot.createDirective("userImageUploads", Slingshot.S3Storage, {
         return true;
     },
     key: function (file) {
-        console.log("FILE:", file);
+        //Set unique id before upload
         let id = (Date.now().toString(36) + Math.random().toString(36).substr(2, 5)).toUpperCase()
         return 'userData/' + Meteor.userId() + "/" + id;
     }

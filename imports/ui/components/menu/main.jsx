@@ -5,42 +5,59 @@ import {bindActionCreators} from 'redux';
 import * as Actions from "/imports/redux/actions/main";
 import {previews} from '../widget/main';
 
+/**
+ * Left menu that houses addable widgets and widget options
+ */
+
 class PureMenu extends Component {
 
     constructor(props){
         super(props);
     }
 
-    componentDidMount(){
-
-    }
-
     renderPreviews(){
-        return previews.map(function(Elem){
 
+        //Render menu children
+        let elementList =  previews.map(function(Elem){
             return (
-                <div className='draggable-widgets' key={Math.random()} style={{padding: '5px', width: '100%'}}>
+                <div key={Math.random()} className='draggable-widgets' style={{padding: '5px', width: '100%'}}>
                     <Elem />
                 </div>
             )
-        })
+        });
+
+        //Wrap children into container
+        return (
+            <div key={Math.random()} style={{height: '100%', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '12px'}}>
+                {elementList}
+            </div>
+        )
     }
 
     renderMenu(){
 
         let self = this;
-        return this.props.currentMenu.map(function(elem){
+
+        //Render menu children
+        let elementList = this.props.currentMenu.map(function(elem){
 
             let selected = true;
-            if(!elem.title) return ''
+
+            //Title of menu item is needed
+            if(!elem.title) return '';
+
+            //If condition is not met, item is not rendered
             if(elem.condition && !elem.condition(self.props.currentContext.data)) return '';
+
+            //Special styling if selected
             if(elem.selected) {
+                //Run function with current widget data to see if it should be selected
                 selected = elem.selected(self.props.currentContext.data);
             }
 
             return (
                 <div style={{textAlign: 'center', width: '100%', padding: '5px'}}
-                     key={elem.title(self.props.currentContext.data)}
+                     key={Math.random()}
                      onClick={()=>{
                          elem.fun(self.props.currentContext.data, self.props.currentData);
                      }}>
@@ -48,23 +65,27 @@ class PureMenu extends Component {
                     <p style={{margin: '0', fontSize: '.85rem'}}>{elem.title(self.props.currentContext.data)}</p>
                 </div>
             )
-        })
+        });
+
+        //Wrap children into container
+        return(
+            <div key={Math.random()} style={{height: '100%', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '12px'}}>
+                {elementList}
+            </div>
+        )
     }
 
     render() {
 
+        //TODO: Add animation when switching elements
+        let relevantElement =
+            this.props.currentMenu === null || typeof this.props.currentMenu === 'undefined' ?
+                this.renderPreviews() : this.renderMenu();
+
         return (
             <div style={{background: '#F2F2F2', marginTop: '50px', height: 'calc(100vh - 50px)', display: 'flex', position: 'fixed', top: 0,
                 left: 0, width: '75px', zIndex: 4, boxShadow: '0 1px 1px 0 rgba(0, 0, 0, 0.15), 0 0px 1px 0 rgba(0, 0, 0, 0.15)'}}>
-                {this.props.currentMenu === null || typeof this.props.currentMenu === 'undefined' ?
-                    <div style={{height: '100%', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '12px'}}>
-                        {this.renderPreviews()}
-                    </div> :
-                    <div onMouseDown={(event)=>event.preventDefault()}
-                         style={{height: '100%', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '12px'}}>
-                        {this.renderMenu()}
-                    </div>
-                }
+                {relevantElement}
             </div>
         );
     }
@@ -80,14 +101,23 @@ function selector(dispatch) {
 
         let selection = nextState.boardLogic.selected;
 
+        /**
+         * Although similar, currentContext and currentData serve slightly different purposes.
+         * currentData allows widgets to send data to the menu component directly without updating the whole widget.
+         * currentContext gives the current boardLayout data of the widget which can be outdated
+         *
+         * Basically, currentData allows for real-time feedback while currentContext gives slightly static data.
+         */
         const nextResult = {
             selection: selection,
+            //Data shared with menu for communication with selected widget
             currentData: function(){
                 if(Array.isArray(selection)) {
                     return null;
                 }
                 return nextState.boardLogic.data;
             }(),
+            //Menu to be rendered with current selected widget
             currentMenu: selection ? function(){
                 if(Array.isArray(selection)) {
                     return null;
@@ -97,6 +127,7 @@ function selector(dispatch) {
 
                 return menu ? menu() : null;
             }() : null,
+            //Widget data of the current selected widget.
             currentContext: selection ? function(){
                 if(Array.isArray(selection)) return null;
                 let selectedWidget = nextState.boardLayout.findIndex((elem) => elem.id === selection.id);

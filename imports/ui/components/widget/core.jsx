@@ -8,6 +8,10 @@ import {bindActionCreators} from 'redux';
 import * as Actions from "/imports/redux/actions/main";
 import store from '/imports/redux/store';
 
+/**
+ * Widget template to use that all widgets will have (such as dragging)
+ */
+
 const widgetSource = {
 
     canDrag(props) {
@@ -20,11 +24,13 @@ const widgetSource = {
 
         document.activeElement.blur();
 
+        //Single drag
         if(selectedWidgets === null) {
             props.handleSelect(props.id, {menu: props.menu});
-            console.log('single drag with menu:', props.menu);
             selectedWidgets = [{id, type, left, top, width, height}];
         }
+
+        //Multi drag
         if(selectedWidgets.findIndex((elem)=>elem.id===id) === -1){
             props.actions.deselectAllWidgetFromBoard();
             props.handleSelect(props.id, {menu: props.menu});
@@ -86,6 +92,10 @@ class PureWidget extends Component {
         this.props.connectDragPreview(getEmptyImage(), {
             captureDraggingState: true,
         })
+    }
+
+    clickHandler(){
+
     }
 
     preventDndOnResize(event){
@@ -181,6 +191,7 @@ function selector(dispatch) {
             ...nextOwnProps
         };
 
+        // Apply default height and width if not specified
         if(!nextOwnProps.width && !nextOwnProps.height){
             let elem = nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id);
 
@@ -188,6 +199,7 @@ function selector(dispatch) {
             nextResult.height = elem.height;
         }
 
+        // Apply default top and left if not specified
         if(!nextOwnProps.top && !nextOwnProps.left){
             let elem = nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id);
 

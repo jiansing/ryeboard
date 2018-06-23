@@ -6,6 +6,13 @@ import * as Actions from "/imports/redux/actions/main";
 import { withTracker } from 'meteor/react-meteor-data';
 import store from '/imports/redux/store';
 
+/**
+ * Navbar at top
+ *
+ * Houses login/logout menu for now but will add other stuff later (such as go to board list)
+ * Also has title input area
+ */
+
 class PureNavBar extends Component {
 
     constructor(props){
@@ -25,10 +32,11 @@ class PureNavBar extends Component {
         Meteor.logout();
     }
 
-    handleEdit(event){
+    handleTitleEdit(event){
         this.props.actions.modifySettingsParam({title: event.target.value});
     }
 
+    //only save when element is blurred
     saveTitle(event){
         this.props.actions.modifySettingsParam({title: event.target.value});
         if(Meteor.user()) Meteor.call('boards.update', store.getState());
@@ -43,16 +51,12 @@ class PureNavBar extends Component {
                 <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', flex: 2}}>
                     <input style={{textAlign: 'center', border: 'none', fontSize: '1.25rem', width: '100%'}}
                            value={this.props.title}
-                           onChange={(event)=>this.handleEdit(event)}
+                           onChange={(event)=>this.handleTitleEdit(event)}
                            onBlur={(event)=> this.saveTitle(event)}
                            placeholder={'your title'} tabIndex={-1}/>
                 </div>
                 <div style={{flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', paddingRight: '1rem'}}>
-                    {/*<button className={'btn-empty'} onClick={()=> this.test()}>
-                        <img src={'/ph.svg'} height={25} width={25} style={{margin: '.5rem'}}/>
-                    </button>*/}
                     <button className={Meteor.userId() ? 'btn-empty' : 'btn-default'} onClick={()=> Meteor.userId() ? this.logout() : this.login()}>
-                        {/*<img src={'/ph.svg'} height={25} width={25} style={{margin: '.5rem', opacity: Meteor.userId() ? 1 : .5}}/>*/}
                         {Meteor.userId() ? 'Logout' : 'Login'}
                     </button>
                 </div>

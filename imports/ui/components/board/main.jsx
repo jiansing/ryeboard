@@ -12,9 +12,17 @@ import snapToGrid from '/imports/helper/snapToGrid'
 import Widget from '../widget/main';
 import DragLayer from './dragLayer';
 import isUrlImage from '/imports/helper/isUrlImage';
+import generateUID from '/imports/helper/uIDGenerator';
 import store from '/imports/redux/store';
 import DragSelect from '/imports/helper/dragSelect'
 import FloatingMenu from '../floating-menu/main'
+
+/**
+ * The board is the main component that users will mostly be working with
+ *
+ * It houses widgets as well as the floating menu. This portion is the main functionality of the board.
+ *
+ */
 
 const widgetTarget = {
     drop(props, monitor, component) {
@@ -27,81 +35,106 @@ const widgetTarget = {
 
         const item = monitor.getItem(), zoomValue = props.zoom ? props.zoom.value : 1;
 
-        if(Array.isArray(item.selectedWidgets)){
+        //adding files
+        if(item.files){
 
-            const delta = monitor.getDifferenceFromInitialOffset();
+            let {x, y} = monitor.getClientOffset(),
+                top = document.getElementById('board-container').pageYOffset ||
+                    document.getElementById('board-container').scrollTop ||
+                    document.getElementById('board-container').scrollTop || 0,
+                left = document.getElementById('board-container').pageXOffset ||
+                    document.getElementById('board-container').scrollLeft ||
+                    document.getElementById('board-container').scrollLeft || 0;
 
-            let widgetArray = [];
+            item.files.forEach(function(file, index){
 
-            item.selectedWidgets.forEach(function(selection){
-                let left = selection.left + delta.x /zoomValue;
-                let top = selection.top + delta.y / zoomValue;
+                //Need to adjust left and top position depending on zoom value
+                let [adjustedLeft, adjustedTop] = snapToGrid((left + x - 75)/ zoomValue, (top + y - 50) / zoomValue);
 
-                [left, top] = snapToGrid(left, top);
+                //Add widget first, before image is loaded/uploaded on S3
+                let id = component.addWidget({
+                    left: adjustedLeft + index * 15, top: adjustedTop + index * 15,
+                    data: {loading: true},
+                    height: 150, width: 150, type: 'image'});
 
-                widgetArray.push({id: selection.id, left, top});
-            });
-
-            component.multiMoveWidget(widgetArray);
-
-        }
-        else {
-            if(item.files){
-
-                let {x, y} = monitor.getClientOffset(),
-                    top = document.getElementById('board-container').pageYOffset ||
-                        document.getElementById('board-container').scrollTop ||
-                        document.getElementById('board-container').scrollTop || 0,
-                    left = document.getElementById('board-container').pageXOffset ||
-                        document.getElementById('board-container').scrollLeft ||
-                        document.getElementById('board-container').scrollLeft || 0;
-
+                //Only upload to S3 if user is logged in
                 if(Meteor.user()){
                     let uploader = new Slingshot.Upload("userImageUploads");
-                    uploader.send(monitor.getItem().files[0], function (error, downloadUrl) {
+                    uploader.send(file, function (error, downloadUrl) {
                         if (error) {
                             alert (error);
                         }
                         else {
-                            component.addWidget({data: {image: downloadUrl}, left: x + left - 75, top: y + top - 50, height: 150, width: 150, type: 'image'});
+                            //Set iamge
+                            component.props.actions.modifyBoard({id, data: {image: downloadUrl, loading: false}});
                         }
                     });
                 }
+                //Else just use as local URL Object
                 else{
-                    let data  = URL.createObjectURL(monitor.getItem().files[0]);
-                    component.addWidget({data: {image: data}, left: x + left - 75, top: y + top - 50, height: 150, width: 150, type: 'image'});
+                    let data  = URL.createObjectURL(file);
+
+                    //Set image
+                    component.props.actions.modifyBoard({id, data: {image: data, loading: false}});
                 }
+            });
+        }
+        //adding URLS
+        else if(item.urls){
+
+            let {x, y} = monitor.getClientOffset(),
+                top = document.getElementById('board-container').pageYOffset ||
+                    document.getElementById('board-container').scrollTop ||
+                    document.getElementById('board-container').scrollTop || 0,
+                left = document.getElementById('board-container').pageXOffset ||
+                    document.getElementById('board-container').scrollLeft ||
+                    document.getElementById('board-container').scrollLeft || 0;
+
+            let data  = item.urls[0];
+
+            let [adjustedLeft, adjustedTop] = snapToGrid((left + x - 75)/ zoomValue, (top + y - 50) / zoomValue);
+
+            // Check if URL is image
+            //TODO: add loading and error screen if url is not image
+            isUrlImage(data, ()=> component.addWidget({
+                data: {image: data}, left: adjustedLeft,
+                top: adjustedTop, height: 150, width: 150, type: 'image'}), 10000);
+        }
+        //adding / moving widgets
+        else {
+
+            const delta = monitor.getDifferenceFromInitialOffset();
+
+            //When multi moving widgets
+            if(item.selectedWidgets){
+                let widgetArray = [];
+
+                item.selectedWidgets.forEach(function(selection){
+                    let left = selection.left + delta.x /zoomValue;
+                    let top = selection.top + delta.y / zoomValue;
+
+                    let [adjustedLeft, adjustedTop] = snapToGrid(left, top);
+
+                    widgetArray.push({id: selection.id, left: adjustedLeft, top: adjustedTop});
+                });
+
+                component.multiMoveWidget(widgetArray);
             }
-            else if(item.urls){
-                let {x, y} = monitor.getClientOffset(),
-                    top = document.getElementById('board-container').pageYOffset ||
-                        document.getElementById('board-container').scrollTop ||
-                        document.getElementById('board-container').scrollTop || 0,
-                    left = document.getElementById('board-container').pageXOffset ||
-                        document.getElementById('board-container').scrollLeft ||
-                        document.getElementById('board-container').scrollLeft || 0;
-
-                let data  = item.urls[0];
-
-                isUrlImage(data, ()=> component.addWidget({data: {image: data}, left: x + left - 75, top: y + top - 50, height: 150, width: 150, type: 'image'}), 10000);
-            }
-            else {
-                const delta = monitor.getDifferenceFromInitialOffset();
-
+            //When single moving/adding widgets
+            else{
                 let left = item.left + delta.x;
                 let top = item.top + delta.y;
 
-                [left, top] = snapToGrid(left / zoomValue, top / zoomValue);
+                let [adjustedLeft, adjustedTop] = snapToGrid(left / zoomValue, top / zoomValue);
 
+                //Check if adding new widget or moving existing widgets
                 if(item.newWidget) {
                     delete item.newWidget;
-                    component.addWidget(update({left, top}, item));
+                    component.addWidget(update({left: adjustedLeft, top: adjustedTop}, item));
                 }
-                else component.moveWidget(item.id, left, top)
-
+                else component.moveWidget(item.id, adjustedLeft, adjustedTop)
             }
         }
-
     }
 };
 
@@ -121,13 +154,42 @@ class PureBoard extends Component {
             resizing: false,
             dragging: false,
         };
+
+        this.setupKeyInputs();
+    }
+
+    componentDidUpdate(){
+
+        if(this.props.zoom.scroll){
+            let self = this;
+
+            // Scroll to offset zoom
+            //TODO: Animate scroll and zoom
+            setTimeout(function(){
+                document.getElementById('board-container').scrollTop = self.props.zoom.scroll.scrollTop;
+                document.getElementById('board-container').scrollLeft = self.props.zoom.scroll.scrollLeft;
+
+                self.props.actions.modifySettingsParam({zoom: {scroll: null}});
+            }, 0);
+        }
+    }
+
+    componentDidMount(){
+        this.setupSelectBox()
+    }
+
+    //Setting up key bindings
+    setupKeyInputs(){
         let self = this;
 
         window.addEventListener('keydown', function(event){
+
+            //Check if a widget has focus. This poriton only runs when no-one has focus
             if(document.activeElement === document.body){
 
                 let key = event.keyCode;
                 switch(key){
+                    //for undo and redo
                     case 90 : {
                         if(event.metaKey){
                             if(event.shiftKey){
@@ -144,19 +206,19 @@ class PureBoard extends Component {
                     }
                 }
             }
+            //Only runs when a widget is selected but no HTML focus is given.
             if(self.props.selectedWidgets){
                 let key = event.keyCode;
 
                 if(document.activeElement === document.body){
                     switch(key){
+                        //Deleting Widget
                         case 8 : {
                             let selected = self.props.selectedWidgets;
                             if(Array.isArray(selected)){
                                 selected = selected.map((elem)=> elem.id)
                             }
                             else selected = selected.id;
-
-
 
                             if(selected != null){
                                 self.props.actions.removeFromBoard(selected);
@@ -179,6 +241,8 @@ class PureBoard extends Component {
 
     multiSelectWidget(id) {
         let selection = this.props.selectedWidgets;
+
+        //Deselect if it is already selected
         if(Array.isArray(selection) && selection.findIndex((elem)=>elem.id === id)!==-1){
             this.props.actions.deselectWidgetFromBoard(id);
         }
@@ -188,9 +252,11 @@ class PureBoard extends Component {
     }
 
     addWidget(data) {
-        this.props.actions.addToBoard({...data});
+        let id = generateUID(this.props.widgets.map((elem)=> elem.id));
+        this.props.actions.addToBoard({id, ...data});
         this.props.actions.setMutable();
         if(Meteor.user()) Meteor.call('boards.update', store.getState());
+        return id;
     }
 
     multiMoveWidget(widgets){
@@ -212,7 +278,10 @@ class PureBoard extends Component {
 
     resizeWidget(id, height, width) {
 
-        if(!id && !height && !width) this.setState({resizing: true});
+        if(!id && !height && !width) {
+            //Show grid
+            this.setState({resizing: true});
+        }
         else{
             this.props.actions.modifyBoard({id, height, width});
             this.props.actions.setMutable();
@@ -228,76 +297,18 @@ class PureBoard extends Component {
         }
     }
 
-    componentDidUpdate(){
+    //Sets up a draggable select box
+    setupSelectBox(){
 
-        if(this.props.zoom.scroll){
-            let self = this;
-            setTimeout(function(){
-                document.getElementById('board-container').scrollTop = self.props.zoom.scroll.scrollTop;
-                document.getElementById('board-container').scrollLeft = self.props.zoom.scroll.scrollLeft;
-
-                //scrollToTop(document.getElementById('board-container'), self.props.zoom.scroll.scrollTop, 250);
-                //scrollToLeft(document.getElementById('board-container'), self.props.zoom.scroll.scrollLeft, 250);
-
-                self.props.actions.modifySettingsParam({zoom: {scroll: null}});
-            }, 0);
-
-            function scrollToTop(element, to, duration) {
-                let start = element.scrollTop,
-                    change = to - start,
-                    currentTime = 0,
-                    increment = 25;
-
-                let animateScroll = function(){
-                    currentTime += increment;
-                    let val = Math.easeInOutQuad(currentTime, start, change, duration);
-                    element.scrollTop = val;
-                    if(currentTime < duration) {
-                        setTimeout(animateScroll, increment);
-                    }
-                };
-                animateScroll();
-            }
-
-            function scrollToLeft(element, to, duration) {
-                let start = element.scrollLeft,
-                    change = to - start,
-                    currentTime = 0,
-                    increment = 25;
-
-                let animateScroll = function(){
-                    currentTime += increment;
-                    let val = Math.easeInOutQuad(currentTime, start, change, duration);
-                    element.scrollLeft = val;
-                    if(currentTime < duration) {
-                        setTimeout(animateScroll, increment);
-                    }
-                };
-                animateScroll();
-            }
-
-            //t = current time
-            //b = start value
-            //c = change in value
-            //d = duration
-            Math.easeInOutQuad = function (t, b, c, d) {
-                t /= d/2;
-                if (t < 1) return c/2*t*t + b;
-                t--;
-                return -c/2 * (t*(t-2) - 1) + b;
-            };
-        }
-    }
-
-    componentDidMount(){
-        
         let self = this,
             selectDisabled = true,
             mouseDown = [0,0],
             dragValue = [0,0];
-        
+
         let ds = new DragSelect({
+            //Only allow these elements to be selected
             selectables: document.getElementsByClassName('selectable'),
+            //Restrict selection area to board-container
             area: document.getElementById('board-container'),
             onElementSelect: function(element) {
                 if(!selectDisabled){
@@ -319,27 +330,38 @@ class PureBoard extends Component {
                 event.preventDefault();
                 event.stopPropagation();
             },
+            //Prevent default dragSelect behaviour
             multiSelectKeys: []
         });
 
         ds.area.addEventListener('mousedown', function (event) {
+            //clear selection to start new one
             ds.clearSelection();
 
+            //Check if drag started from widget or board. If widget, disable.
             selectDisabled = event.srcElement.className.indexOf('grid') === -1;
+
+            //We're dragging a widget! Stop DS!
             if(selectDisabled){
                 ds.stop();
             }
+            //We're dragging the selectbox, start it up!
             else {
+
+                //add any new selectable widgets. Need to do this manually cause it doesn't update automatically
                 ds.addSelectables(document.getElementsByClassName('selectable'));
 
+                //Custom code to DS library to allow zoom-in-out functionality
                 ds.setScale(self.props.zoom.value);
                 ds.start();
             }
+            //Record beginning coordinate
             mouseDown = [event.pageX, event.pageY];
         }, true);
 
         ds.area.addEventListener('mousedown', function (event) {
 
+            //Deselect all widgets only if board is source of the click and shift key is not pressed
             if(!selectDisabled && !event.shiftKey) {
                 self.deselectAllWidgets(event);
             }
@@ -348,21 +370,20 @@ class PureBoard extends Component {
 
         ds.area.addEventListener('mousemove', function (event) {
             if(mouseDown) {
+                //Record how much is dragged
                 dragValue = [event.pageX, event.pageY]
             }
         }, true);
 
 
-        ds.area.addEventListener('mouseup', function (event) {
-            if(!selectDisabled && Math.abs(mouseDown[0] - dragValue[0]) <= 5 && Math.abs(mouseDown[1] - dragValue[1]) <= 5){
-                //self.deselectAllWidgets(event)
-            }
+        ds.area.addEventListener('mouseup', function () {
+
+            //Reset DS
             dragValue = [0,0];
             mouseDown = [0,0];
             selectDisabled = true;
             ds.clearSelection();
         }, true);
-
     }
 
     renderWidget(item) {
