@@ -5,6 +5,11 @@ import Home from '/imports/ui/pages/app/home/main';
 import Missing from '/imports/ui/pages/missing/main';
 import Login from '/imports/ui/pages/login/main';
 
+
+/**
+ * Routes for Website
+ */
+
 class PureRoutes extends React.Component{
     constructor(props){
         super(props);

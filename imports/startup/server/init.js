@@ -1,3 +1,5 @@
+
+//Set Google config for OAuth Login
 let secrets = JSON.parse(Assets.getText('client_secret.json'));
 
 ServiceConfiguration.configurations.upsert({

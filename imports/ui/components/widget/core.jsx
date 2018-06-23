@@ -118,6 +118,7 @@ class PureWidget extends Component {
             this.props.handleMultiSelect(this.props.id);
         }
         else {
+            console.log('widget single select');
             this.props.handleSelect(this.props.id, {menu: this.props.menu});
         }
     }

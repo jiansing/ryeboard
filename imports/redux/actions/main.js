@@ -1,7 +1,3 @@
-/**
- * Created by JohnBae on 7/1/17.
- */
-
 import * as types from '../constants/actionTypes';
 
 //***** Board Redux Actions *****//
@@ -51,7 +47,7 @@ export const multiSelectWidgetFromBoard = (id, data) => {
 
     return {
         type: types.BOARD_MULTI_SELECT_WIDGET,
-        value: {id, data}
+        value: {id}
     }
 };
 
@@ -112,12 +108,16 @@ export const modifySettingsParam = (value) => {
     }
 };
 
+//***** Other Redux Actions *****//
+
+//Tells undoable that a state is not undoable
 export const setMutable = () => {
     return {
         type: 'SET_MUTABLE'
     }
 };
 
+//State override (when initializing boards)
 export const setState = (state) => {
 
     return {
