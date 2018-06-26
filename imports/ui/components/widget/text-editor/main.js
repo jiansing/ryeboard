@@ -143,6 +143,7 @@ class PureTextEditor extends Component{
         return(
             <Core selected={this.props.selected}
                   focused={this.state.focused}
+                  minSize={[150, 150]}
                   menu={()=>this.compileMenu()}
                   {...this.props}>
                 <div style={{position: 'absolute', height: '100%', width: '100%', zIndex: this.state.focused ? -1 : 3}}
@@ -195,7 +196,8 @@ function selector(dispatch) {
         nextState = nextState.undoable.present;
 
         //prevent redoing selector if just dragging
-        if(nextState.boardLogic.dragging && result.actions) {
+        if(result.ignore && nextState.boardLogic.dragging) {
+            result.ignore = true
             result.shouldUpdate = false;
             return result;
         };
