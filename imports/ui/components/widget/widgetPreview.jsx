@@ -15,13 +15,13 @@ const widgetSource = {
             width = props.width || 150,
             height = props.height || 150;
 
-        let topOffset = document.getElementById('preview-' + props.type).parentElement.offsetTop + 5,
-            leftOffset = document.getElementById('preview-' + props.type).parentElement.offsetLeft + 10;
+        let topOffset = document.getElementById('preview-' + props.type).parentElement.offsetTop + 50,
+            leftOffset = document.getElementById('preview-' + props.type).parentElement.offsetLeft + 35;
 
         console.log('top offset:', topOffset, '\nleftOffset:', leftOffset, '\ntop:', top, '\nleft:',left);
 
         top += topOffset;
-        left -= 75 - leftOffset;
+        left += leftOffset;
 
         return { type, data, left, top, width, height, newWidget }
     },
@@ -63,10 +63,18 @@ class Widget extends Component {
         const { connectDragSource } = this.props;
 
         return connectDragSource(
-            <div style={styles} id={'preview-'+this.props.type}>
-                <div style={{textAlign: 'center'}}>
-                    <img src={this.props.icon} height={25} width={25} />
-                    <p style={{margin: '0'}}>{this.props.type}</p>
+            <div style={{
+                     position: 'relative',
+                     background: 'transparent',
+                     width: '100%',
+                     marginBottom: '5px'
+                 }}
+                 id={'preview-'+this.props.type}
+                 className='draggable-widgets'>
+                <div style={{textAlign: 'center', display: 'flex', flexDirection: 'column',
+                    alignItems: 'center', justifyContent: 'center'}}>
+                    <img src={this.props.icon} height={30} width={30} />
+                    <label style={{margin: '0'}}>{this.props.type.charAt(0).toUpperCase() + this.props.type.slice(1)}</label>
                 </div>
             </div>
         );

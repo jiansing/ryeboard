@@ -1,0 +1,23 @@
+@import '/imports/ui/styles/variables/colors';
+@import '/imports/ui/styles/variables/break-points';
+@import '/imports/ui/styles/variables/styles';
+
+/*
+Designs general elements.
+
+Move to separate file if it gets big! (Ex: buttons)
+ */
+#render-target {
+  #menuBar{
+    background: #FFFFFF;
+    margin-top: 100px;
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 25px;
+    width: 75px;
+    z-index: 4;
+    transition: all .5s ease-in-out;
+    box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.15), 0 0 1px 0 rgba(0, 0, 0, 0.15)
+  }
+}

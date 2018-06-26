@@ -90,7 +90,7 @@ class PureWidget extends Component {
 
     componentDidMount() {
         this.props.connectDragPreview(getEmptyImage(), {
-            captureDraggingState: true,
+            //captureDraggingState: true,
         })
     }
 

@@ -12,23 +12,23 @@ Move to separate file if it gets big! (Ex: buttons)
   /* width */
   ::-webkit-scrollbar {
     z-index: 10000;
-    width: 0px;
-    height: 0px;
+    width: 5px;
+    height: 5px;
   }
 
   /* Track */
   ::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: #F0EDED;
   }
 
   /* Handle */
   ::-webkit-scrollbar-thumb {
-    background: #888;
+    background: #495867;
   }
 
   /* Handle on hover */
   ::-webkit-scrollbar-thumb:hover {
-    background: #555;
+    background: #232323;
   }
 
   .ds-selector{
@@ -56,12 +56,12 @@ Move to separate file if it gets big! (Ex: buttons)
   }
 
   .show{
-    opacity: 1;
+    opacity: .75;
     z-index: 0;
   }
 
   .hide{
-    opacity: .25;
+    opacity: 0;
     z-index: 0;
   }
 
@@ -93,17 +93,37 @@ Move to separate file if it gets big! (Ex: buttons)
   }
 
   .draggable-widgets{
-    transition: all ease-in-out .25s;
+    label{
+      transition: all ease-in-out .25s;
+    }
+    img{
+      transition: all ease-in-out .25s;
+    }
   }
 
   .draggable-widgets:hover{
-    transform: scale(1.1, 1.1) translate(5px, 0);
+    label{
+      transform: translate(5px);
+    }
+    img{
+      transform: translate(10px, -5px) scale(1.25, 1.25);
+    }
   }
 
   hr {
-    margin-left: 25px;
-    margin-right: 25px;
+    margin-left: 5px;
+    margin-right: 5px;
     color: lightgray;
+    width: calc(100% - 10px)
     //border: solid gray 5px;
+  }
+
+  #floating-menu{
+    opacity: .5;
+    transition: all .5s ease-in-out;
+  }
+
+  #floating-menu:hover{
+    opacity: 1;
   }
 }

@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import Slider from 'react-rangeslider'
 
 /**
  * Floating, right, bottom, menu on the board.
@@ -9,6 +10,14 @@ import React, {Component} from 'react';
 export default class FloatingMenu extends React.Component{
     constructor(props){
         super(props);
+    }
+
+    handleChange(value) {
+
+        //Create css attribute
+        let scale = 'scale(' + value + ', ' + value + ')';
+
+        this.modifyZoomValue(value, scale);
     }
 
     zoomOut(){
@@ -79,28 +88,22 @@ export default class FloatingMenu extends React.Component{
         return (
             <div style={{position: 'fixed', right: '15px', bottom: '20px', display: 'flex', width: '75px',
                 flexDirection: 'column', zIndex: '15'}}
+                 id={'floating-menu'}
                  onClick={(event)=>event.stopPropagation()}>
-                <label style={{textAlign: 'center'}}>
-                    X{this.props.zoom ? this.props.zoom.value : 1}
-                </label>
-
-                <button style={{textAlign: 'center', margin: '5px', marginTop: '10px'}}
-                        className={'btn-floating'}
-                        onClick={() => this.zoomIn()}>
-                    <img src={'/icons/zoom-in.svg'} height={30} width={30}/>
-                </button>
-
-                <button style={{textAlign: 'center', margin: '5px'}}
-                        className={'btn-floating'}
-                        onClick={() => this.zoomOut()}>
-                    <img src={'/icons/zoom-out.svg'} height={30} width={30}/>
-                </button>
-
-                <button style={{textAlign: 'center', margin: '5px'}}
-                        className={'btn-floating'}
-                        onClick={() => this.resetZoom()}>
-                    <img src={'/icons/zoom-reset.svg'} height={30} width={30}/>
-                </button>
+                <div className='slider-vertical'>
+                    <Slider
+                        min={.5}
+                        max={1.5}
+                        step={.25}
+                        tooltip={false}
+                        value={this.props.zoom.value || 1}
+                        orientation='vertical'
+                        onChange={(value)=>this.handleChange(value)}
+                    />
+                    <div className='value' style={{textAlign: 'center'}}>
+                        <label>x{this.props.zoom.value || 1}</label>
+                    </div>
+                </div>
             </div>
         )
     }

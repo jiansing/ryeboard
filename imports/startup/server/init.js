@@ -1,3 +1,4 @@
+import '/imports/api/accounts/server/publications';
 
 //Set Google config for OAuth Login
 let secrets = JSON.parse(Assets.getText('client_secret.json'));

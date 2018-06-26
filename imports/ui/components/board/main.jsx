@@ -49,7 +49,7 @@ const widgetTarget = {
             item.files.forEach(function(file, index){
 
                 //Need to adjust left and top position depending on zoom value
-                let [adjustedLeft, adjustedTop] = snapToGrid((left + x - 75)/ zoomValue, (top + y - 50) / zoomValue);
+                let [adjustedLeft, adjustedTop] = snapToGrid((left + x)/ zoomValue, (top + y - 50) / zoomValue);
 
                 //Add widget first, before image is loaded/uploaded on S3
                 let id = component.addWidget({
@@ -92,7 +92,7 @@ const widgetTarget = {
 
             let data  = item.urls[0];
 
-            let [adjustedLeft, adjustedTop] = snapToGrid((left + x - 75)/ zoomValue, (top + y - 50) / zoomValue);
+            let [adjustedLeft, adjustedTop] = snapToGrid((left + x)/ zoomValue, (top + y - 50) / zoomValue);
 
             // Check if URL is image
             //TODO: add loading and error screen if url is not image
@@ -403,7 +403,7 @@ class PureBoard extends Component {
 
         return connectDropTarget(
             <div id='board-container'
-                 style={{marginTop: '50px', marginLeft: '75px', width: 'calc(100vw - 75px)',
+                 style={{marginTop: '50px', width: '100vw',
                      height: 'calc(100vh - 50px)', overflow: 'scroll'}}>
 
                 <DragLayer zoomValue={zoomValue} zoomScale={zoomScale}/>

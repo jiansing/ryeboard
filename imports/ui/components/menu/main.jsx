@@ -20,7 +20,7 @@ class PureMenu extends Component {
         //Render menu children
         let elementList =  previews.map(function(Elem){
             return (
-                <div key={Math.random()} className='draggable-widgets' style={{padding: '5px', width: '100%'}}>
+                <div key={Math.random()} style={{padding: '5px', width: '100%'}}>
                     <Elem />
                 </div>
             )
@@ -28,7 +28,10 @@ class PureMenu extends Component {
 
         //Wrap children into container
         return (
-            <div key={Math.random()} style={{height: '100%', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '12px'}}>
+            <div key={Math.random()} style={{height: '100%', width: '100%', display: 'flex', flexDirection: 'column',
+                alignItems: 'center', marginTop: '12px', marginBottom: '12px', justifyContent: 'center'}}>
+                <label style={{textAlign: 'center', color: '#DB5461', fontWeight: 700}}>Menu</label>
+                <hr />
                 {elementList}
             </div>
         )
@@ -69,7 +72,10 @@ class PureMenu extends Component {
 
         //Wrap children into container
         return(
-            <div key={Math.random()} style={{height: '100%', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '12px'}}>
+            <div key={Math.random()} style={{height: '100%', width: '100%', display: 'flex', flexDirection: 'column',
+                alignItems: 'center', marginTop: '12px', marginBottom: '12px', justifyContent: 'center'}}>
+                <label style={{textAlign: 'center', color: '#DB5461', fontWeight: 700}}>Widget Menu</label>
+                <hr />
                 {elementList}
             </div>
         )
@@ -83,8 +89,7 @@ class PureMenu extends Component {
                 this.renderPreviews() : this.renderMenu();
 
         return (
-            <div style={{background: '#F2F2F2', marginTop: '50px', height: 'calc(100vh - 50px)', display: 'flex', position: 'fixed', top: 0,
-                left: 0, width: '75px', zIndex: 4, boxShadow: '0 1px 1px 0 rgba(0, 0, 0, 0.15), 0 0px 1px 0 rgba(0, 0, 0, 0.15)'}}>
+            <div id='menuBar'>
                 {relevantElement}
             </div>
         );
