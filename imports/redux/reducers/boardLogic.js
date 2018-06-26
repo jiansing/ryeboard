@@ -50,6 +50,7 @@ function selection(state = DEFAULT_STATE, action) {
         }
 
         case types.BOARD_DESELECT_ALL_WIDGET: {
+            console.log('deselecting all widgets');
             let newState = Object.assign(state);
             newState.selected = null;
             newState.data = null;

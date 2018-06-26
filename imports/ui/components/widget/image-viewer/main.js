@@ -199,6 +199,16 @@ class PureImageViewer extends Component{
                 </div>
             )
         }
+        else if(this.props.loading){
+            return(
+                <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+                    <div className="spinner"/>
+                    <div style={{marginTop: '25px', color: 'gray'}}>
+                        Loading Image...
+                    </div>
+                </div>
+            )
+        }
         else{
             return(
                 <label style={{color: 'gray'}}>Drag or Upload an Image here</label>
@@ -251,7 +261,8 @@ function selector(dispatch) {
         nextState = nextState.undoable.present;
 
         //Prevent redoing selector if just dragging
-        if(nextState.boardLogic.dragging && result.actions) {
+        if(result.ignore && nextState.boardLogic.dragging) {
+            result.ignore = true;
             return result;
         };
 
@@ -273,6 +284,12 @@ function selector(dispatch) {
             actions: actions,
             selected: selected,
             minSize: widget ? widget.minSize : null,
+            loading: function() {
+                if(widget && widget.data) {
+                    return widget.data.loading;
+                }
+                else return null;
+            }(),
             imageData: function() {
                 if(widget && widget.data) {
                     return widget.data.image;
