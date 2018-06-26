@@ -14,9 +14,9 @@ import Editor from 'draft-js-plugins-editor';
 import createLinkifyPlugin from 'draft-js-linkify-plugin';
 import createAutoListPlugin from 'draft-js-autolist-plugin'
 
-import 'draft-js/dist/Draft.css'
 import store from '/imports/redux/store';
 
+// Making links clickable
 let linkify = createLinkifyPlugin({
     component: (props) => (
         // eslint-disable-next-line no-alert, jsx-a11y/anchor-has-content
@@ -24,8 +24,10 @@ let linkify = createLinkifyPlugin({
     )
 });
 
+// Making lists happen automatically
 const autoListPlugin = createAutoListPlugin()
 
+// Put plugins into array
 let plugins = [linkify, autoListPlugin];
 
 class PureTextEditor extends Component{
@@ -33,6 +35,7 @@ class PureTextEditor extends Component{
     constructor(props) {
         super(props);
 
+        //convert saved data to editorState
         let saved = props.savedEditorState ? EditorState.createWithContent(convertFromRaw(props.savedEditorState)) : null;
         this.state = {
             focused: false,
@@ -42,10 +45,7 @@ class PureTextEditor extends Component{
         this.handleKeyCommand = this.handleKeyCommand.bind(this);
     }
 
-    componentDidMount(){
-
-    }
-
+    // Switch out state editorState with prop editorState. Used to enable redo / undo functionality
     static getDerivedStateFromProps(nextProps, prevState){
         if(prevState.editorState && nextProps.savedEditorState && nextProps.shouldUpdate){
             //if(prevState.editorState) console.log('old state -', convertToRaw(prevState.editorState.getCurrentContent()));
@@ -57,6 +57,7 @@ class PureTextEditor extends Component{
         return prevState;
     }
 
+    // Editor needs more steps to make undoable / mutable
     makeMutable(){
         let content = this.state.editorState.getCurrentContent();
         let raw = convertToRaw(content);
@@ -84,9 +85,7 @@ class PureTextEditor extends Component{
         const newState = RichUtils.handleKeyCommand(editorState, command);
         if (newState) {
             this.handleEdit(newState);
-            return 'handled';
         }
-        return 'not-handled';
     }
 
     onBoldClick(test) {
@@ -132,6 +131,7 @@ class PureTextEditor extends Component{
 
     render(){
 
+        //To prevent strange styling when no text is present in a list
         let className = 'showPlaceholder';
         let contentState = this.state.editorState.getCurrentContent();
         if (!contentState.hasText()) {
@@ -140,11 +140,10 @@ class PureTextEditor extends Component{
             }
         }
 
-        console.log('className?', className);
-
         return(
             <Core selected={this.props.selected}
                   focused={this.state.focused}
+                  minSize={[150, 150]}
                   menu={()=>this.compileMenu()}
                   {...this.props}>
                 <div style={{position: 'absolute', height: '100%', width: '100%', zIndex: this.state.focused ? -1 : 3}}
@@ -196,6 +195,13 @@ function selector(dispatch) {
 
         nextState = nextState.undoable.present;
 
+        //prevent redoing selector if just dragging
+        if(result.ignore && nextState.boardLogic.dragging) {
+            result.ignore = true
+            result.shouldUpdate = false;
+            return result;
+        };
+
         const nextResult = {
             actions: actions,
             selected: function(){
@@ -219,6 +225,7 @@ function selector(dispatch) {
             ...nextOwnProps
         };
 
+        //TODO: prevent unnecessary renders
         nextResult.shouldUpdate = true;
 
         if(!equals(nextResult, result)){

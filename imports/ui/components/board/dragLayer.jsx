@@ -2,6 +2,14 @@ import React, { Component } from 'react'
 import { DragLayer } from 'react-dnd'
 import Widget from '../widget/main';
 
+/**
+ * The dragLayer is the component used when anything is dragged on the board
+ *
+ * This custom layer allows us to manipulate elements mid drag. Useful for when adding new widgets by dragging.
+ *
+ */
+
+//Used for dragging widgets around
 function getItemStyles(props) {
     const { initialOffset, currentOffset, zoomValue } = props;
     if (!initialOffset || !currentOffset) {
@@ -20,8 +28,10 @@ function getItemStyles(props) {
     }
 }
 
+
 class PureDragLayer extends Component {
 
+    //Existing widgets require offset adjustements of the menu and navbar
     renderItem(type, item, offsetTop, offsetLeft) {
 
         switch (type) {

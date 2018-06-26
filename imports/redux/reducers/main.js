@@ -8,6 +8,7 @@ import settings from './settings';
 import { combineReducers } from 'redux'
 import undoable from 'redux-undo';
 
+//Mix with undoable to enable undo redo functionality
 export default combineReducers({
     undoable: undoable(combineReducers({
         boardLayout,
@@ -15,6 +16,7 @@ export default combineReducers({
     }), {
         limit: 15,
         filter: function filterActions(action, currentState, previousHistory) {
+            //This is to allow multiple actions to be interpreted as a single undoable action
             return action.type === 'SET_MUTABLE';
         }
     }),

@@ -2,37 +2,18 @@
 @import '/imports/ui/styles/variables/break-points';
 @import '/imports/ui/styles/variables/styles';
 
+/*
+Designs general elements.
+
+Move to separate file if it gets big! (Ex: buttons)
+ */
 #render-target {
-
-  .draftJsLinkifyPlugin__link__2ittM, .draftJsLinkifyPlugin__link__2ittM:visited {
-    color: #5e93c5;
-    text-decoration: none;
-  }
-
-  .draftJsLinkifyPlugin__link__2ittM:hover, .draftJsLinkifyPlugin__link__2ittM:focus {
-    color: #7eadda;
-    outline: 0; /* reset for :focus */
-    cursor: pointer;
-  }
-
-  .draftJsLinkifyPlugin__link__2ittM:active {
-    color: #4a7bab;
-  }
-
-  .hidePlaceholder .public-DraftEditorPlaceholder-root {
-    margin-left: 1.5rem;
-  }
-
-  .hidePlaceholder .public-DraftStyleDefault-ol, .public-DraftStyleDefault-ul {
-    margin: 0px 0;
-    padding: 0;
-  }
 
   /* width */
   ::-webkit-scrollbar {
     z-index: 10000;
-    width: 7px;
-    height: 7px;
+    width: 0px;
+    height: 0px;
   }
 
   /* Track */
@@ -64,7 +45,7 @@
     width: 5000px;
     overflow: hidden;
     cursor: default;
-    background-color: #D9D3CD;
+    background-color: #F0EDED;
   }
 
   .grid {

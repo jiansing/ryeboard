@@ -52,18 +52,6 @@ class PureHome extends React.Component{
                         </button>
 
                         <button className="btn-default"
-                                onClick={() => this.toSignUp()}
-                                style={{display: "block", width: '100%', marginTop: '1rem', opacity: .5, fontSize: '1rem'}}>
-                            Sign up with Email
-                        </button>
-
-                        <button className="btn-default"
-                                onClick={() => this.toLogin()}
-                                style={{display: "block", width: '100%', opacity: .5, fontSize: '1rem'}}>
-                            Login with Email
-                        </button>
-
-                        <button className="btn-default"
                                 onClick={() => this.navigateBack()}
                                 style={{display: "block", width: '100%', opacity: 1, fontSize: '1rem'}}>
                             Back

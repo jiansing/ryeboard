@@ -4,6 +4,10 @@
 
 import * as types from '../constants/actionTypes';
 
+/**
+ * For board data that does not need to be saved.
+ */
+
 const DEFAULT_STATE = {
     selected: null,
     data: null,
@@ -14,17 +18,20 @@ function selection(state = DEFAULT_STATE, action) {
 
     switch (action.type) {
 
+        //Data regarding the current selected widget. Used when sending data to menu
         case types.BOARD_SET_SELECTED_WIDGET_DATA: {
             let newState = Object.assign(state);
             newState.data = action.value;
             return newState;
         }
 
+        //Set the current selected widget with menu data
         case types.BOARD_SELECT_WIDGET: {
             let newState = Object.assign(state);
             newState.selected = action.value;
             return newState;
         }
+
 
         case types.BOARD_MULTI_SELECT_WIDGET: {
             let newState = Object.assign(state);
@@ -43,6 +50,7 @@ function selection(state = DEFAULT_STATE, action) {
         }
 
         case types.BOARD_DESELECT_ALL_WIDGET: {
+            console.log('deselecting all widgets');
             let newState = Object.assign(state);
             newState.selected = null;
             newState.data = null;

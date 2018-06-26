@@ -14,10 +14,28 @@ import isUrlImage from '/imports/helper/isUrlImage';
 import store from '/imports/redux/store';
 
 import getAspectRatio from './tools/getAspectRatio';
-import ReactCrop from 'react-image-crop';
-import rotateImage from './tools/rotate';
 import EditCanvas from './tools/editCanvas';
 
+/**
+ * Image widget that enables users to upload images
+ *
+ * Unique data this widget uses is:
+ *
+ * ratio[true/false] - used to determine whether resizing should be done proportionally or not
+ * loading[true/false] - used to determine if image is being loaded or not
+ * image[*] - image file to be displayed
+ */
+
+/**
+ * Function that figures out what to do with image data
+ *
+ * Either uploads image to S3 or uses local Object URL option to display images
+ *
+ * TODO: separate this into another file and use globally
+ *
+ * @param {file} file - image that needs to be displayed
+ * @param {function} setImage - function on what to do after it decides
+ */
 function processImageData(file, setImage){
     file = file[0];
 
@@ -50,6 +68,7 @@ const ImageTarget = {
         if(item.urls){
             let data  = item.urls[0];
 
+            //only set if url is image
             isUrlImage(data, () =>  component.setImage(data), 10000);
         }
     },
@@ -75,7 +94,6 @@ class PureImageViewer extends Component{
     }
 
     setImage(image){
-        console.log('setting image...', this.props.id);
         let id = this.props.id;
         this.props.actions.modifyBoard({id, data: {image: image}});
         this.props.actions.setMutable();
@@ -106,10 +124,11 @@ class PureImageViewer extends Component{
         if(Meteor.user()) Meteor.call('boards.update', store.getState());
     }
 
-    compileMenu(context){
+    compileMenu(){
 
         let self = this;
 
+        // lock / unlock ratio resizing
         let ratio = {
             condition: (data)=> typeof data !== 'undefined' && typeof data.image !== 'undefined' && data.image,
             icon: '/icons/ratio.svg',
@@ -117,27 +136,15 @@ class PureImageViewer extends Component{
             fun: (data)=> {if(data)  return data.ratio ? this.unlockAspectRatio() : this.lockAspectRatio()}
         };
 
-        let rotate = {
+        // open image edit
+        let edit = {
             condition: (data)=> typeof data !== 'undefined' && typeof data.image !== 'undefined' && data.image,
             icon: '/icons/ratio.svg',
             title: () => 'Edit',
             fun: (context, data)=> self.props.actions.setSelectedWidgetData({edit: true})
         };
 
-        let spotlight = {
-            condition: (data)=> typeof data !== 'undefined' && typeof data.image !== 'undefined' && data.image,
-            icon: '/icons/ratio.svg',
-            title: (data) => {if(data) return data.ratio ? 'unlock ratio' : 'lock ratio'},
-            fun: (data)=> {if(data)  return data.ratio ? this.unlockAspectRatio() : this.lockAspectRatio()}
-        };
-
-        let crop = {
-            condition: (data)=> typeof data !== 'undefined' && typeof data.image !== 'undefined' && data.image,
-            icon: '/icons/ratio.svg',
-            title: (data) => {if(data) return data.ratio ? 'unlock ratio' : 'lock ratio'},
-            fun: (data)=> {if(data)  return data.ratio ? this.unlockAspectRatio() : this.lockAspectRatio()}
-        };
-
+        // display image with native fileupload
         let uploadFile = {
             condition: (data)=> data == null || data.image == null,
             icon: '/icons/ratio.svg',
@@ -145,9 +152,10 @@ class PureImageViewer extends Component{
             fun: (data)=> this.input.click()
         };
 
-        return [ratio, uploadFile, rotate];
+        return [ratio, uploadFile, edit];
     }
 
+    //Save image from edit tool
     uploadData(data){
 
         let self = this;
@@ -158,7 +166,6 @@ class PureImageViewer extends Component{
         blobData.lastModifiedDate = new Date();
 
         if(Meteor.user()) processImageData([blobData], (image)=>{
-            console.log('uploaded and setting:', image);
             self.setImage(image)
         });
         else self.setImage(data);
@@ -173,7 +180,7 @@ class PureImageViewer extends Component{
         }
     }
 
-    selectContent(){
+    relevantElement(){
 
         if(this.props.imageData){
             return(
@@ -192,6 +199,16 @@ class PureImageViewer extends Component{
                 </div>
             )
         }
+        else if(this.props.loading){
+            return(
+                <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+                    <div className="spinner"/>
+                    <div style={{marginTop: '25px', color: 'gray'}}>
+                        Loading Image...
+                    </div>
+                </div>
+            )
+        }
         else{
             return(
                 <label style={{color: 'gray'}}>Drag or Upload an Image here</label>
@@ -203,7 +220,7 @@ class PureImageViewer extends Component{
 
         const { connectDropTarget } = this.props;
 
-        const Content = this.selectContent();
+        const Content = this.relevantElement();
 
         return (
             <Core selected={this.props.selected}
@@ -243,6 +260,12 @@ function selector(dispatch) {
 
         nextState = nextState.undoable.present;
 
+        //Prevent redoing selector if just dragging
+        if(result.ignore && nextState.boardLogic.dragging) {
+            result.ignore = true;
+            return result;
+        };
+
         let widget = nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id);
 
         let selected = function(){
@@ -261,6 +284,12 @@ function selector(dispatch) {
             actions: actions,
             selected: selected,
             minSize: widget ? widget.minSize : null,
+            loading: function() {
+                if(widget && widget.data) {
+                    return widget.data.loading;
+                }
+                else return null;
+            }(),
             imageData: function() {
                 if(widget && widget.data) {
                     return widget.data.image;
@@ -282,6 +311,7 @@ function selector(dispatch) {
             ...nextOwnProps
         };
 
+        // Apply default height and width if not specified
         if(!nextOwnProps.width && !nextOwnProps.height){
             let elem = nextState.boardLayout.find((elem)=>elem.id === nextOwnProps.id);
 

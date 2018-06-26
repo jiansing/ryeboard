@@ -5,6 +5,10 @@
 import * as types from '../constants/actionTypes';
 import deepChange from 'updeep';
 
+/**
+ * Settings stuff
+ */
+
 const DEFAULT_STATE = {
     loggedIn: false,
     title: 'Welcome to Ryeboard!',

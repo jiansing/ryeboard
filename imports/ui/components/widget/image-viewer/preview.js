@@ -5,6 +5,9 @@
 import React, {Component} from 'react';
 import PreviewCore from '../widgetPreview';
 
+/**
+ * How the image widget preview looks on the menu
+ */
 export default class Preview extends Component{
     constructor(props){
         super(props);

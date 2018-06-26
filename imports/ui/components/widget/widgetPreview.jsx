@@ -27,7 +27,6 @@ const widgetSource = {
     },
 };
 
-
 function collect(connect, monitor) {
     return {
         connectDragSource: connect.dragSource(),
